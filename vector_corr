@@ -131,8 +131,9 @@ b_Mtx=angulados.b 		# b-matrix para mrtrix
 echo  -e "\e[0;32m\n	[INFO]... Rotando vectores por las transformaciones de edyy/topup\e[0m"
 export bvec_Pos="${tmp}/$b_Mtx"
 export eddy="`pwd`/$eddyparam"
-python rotateBvec.py
 
+# NOTA: Aqui tienes que poner la via completa de donde esta el script ejecutable, debo de pensar en una mejor manera de hacerlo despues
+python /misc/ernst/rcruces/git_here/rrcOpen/rotateBvec.py
 
 
 ############### ... Nuevo mif con los vectores corregidos ############## 
