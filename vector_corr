@@ -29,7 +29,7 @@ NOTA: bvec y bval deben estar en formato COLUMNA!!!
 
 
 Example :
-	`basename $0` DWI.nii.gz DWI.bvecs DWI.bvals corrected.eddy DWI_corrected.nii.gz
+	`basename $0` dwi.omat dwi.bvecs dwi.bvals corrected.eddy dwi_corrected.nii.gz new_dwi
 		DWI.omat		Archivo con la matriz de rotación
 		DWI.bvecs		Son los bvecs del volumen DWI
 		DWI.bvals		Son los bvals del volumen DWI
