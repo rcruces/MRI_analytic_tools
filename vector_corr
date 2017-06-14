@@ -68,6 +68,7 @@ fi
 
 ############## parameters ############## 
 # Setting: mrtrix3 update, docmd & time
+source `which rotateBvec.py`
 source /home/inb/lconcha/fmrilab_software/tools/setup_mrtrix3_git.sh
 aloita=$(date +%s.%N)
 
@@ -86,15 +87,17 @@ fi
 
 # Starting!
 echo -e "\e[0;44m \n Correccion de vectores de DWI y creacion de mif \n\e[0m"; 
-echo -e "Parametros:	\nMatriz omat: $1 \nbvecs: $2 \nbvals: $3 \nCorrected.eddy: $4 DWI_corregido: $5 \nNuevo nombre: $6"
+echo -e "Parametros:	\n	Matriz omat: $1 \n	bvecs: $2 \n	bvals: $3 \n	Corrected.eddy: $4 \n	DWI_corregido: $5 \n	Nuevo nombre: $6"
 
 # Crea un directorio para archivos temporales, al final se borrara
 tmp=/tmp/vectorCorr_$$
 mkdir $tmp
-echo "Directorio con archivos temporales en $tmp"
+echo ""
+echo -e "\e[0;32m\n	[INFO]... Directorio con archivos temporales: \e[0m"
+echo $tmp
 
 ############### ... filas en blanco?? ##############
-c=grep -c "^\s*$" $bvec
+c=`grep -c "^\s*$" $bvec`
 if ((c > 0)); 
 then
 	echo  -e "\e[0;32m\n	[INFO]... Borrando filas en blanco de bvals & bvecs \e[0m"
