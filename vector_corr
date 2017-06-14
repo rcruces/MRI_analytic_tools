@@ -68,7 +68,6 @@ fi
 
 ############## parameters ############## 
 # Setting: mrtrix3 update, docmd & time
-source `which rotateBvec.py`
 source /home/inb/lconcha/fmrilab_software/tools/setup_mrtrix3_git.sh
 aloita=$(date +%s.%N)
 
