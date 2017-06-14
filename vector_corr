@@ -120,7 +120,7 @@ echo  -e "\e[0;32m\n	[INFO]... Corrigiendo los vectores Y & Z\e[0m"
 b_Mtx=angulados.b 		# b-matrix para mrtrix
 
 	# bvec - multiplicando Z y Y por -1
-	awk '{print $1,-$2,-$3}' $rot > ${tmp}/inv_YZ.bvec
+	awk '{print $1,-$2,-$3}' ${tmp}/$rot > ${tmp}/inv_YZ.bvec
 
 	# Creando nuevo archivo con los vectores corregidos para Mrtrix
 	paste ${tmp}/inv_YZ.bvec $bval > ${tmp}/$b_Mtx
