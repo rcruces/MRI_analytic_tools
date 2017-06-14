@@ -94,7 +94,7 @@ tmp=/tmp/vectorCorr_$$
 mkdir $tmp
 echo ""
 echo -e "\e[0;32m\n	[INFO]... Directorio con archivos temporales: \e[0m"
-echo $tmp
+echo "	$tmp"
 
 ############### ... filas en blanco?? ##############
 c=`grep -c "^\s*$" $bvec`
@@ -111,7 +111,7 @@ fi
 echo  -e "\e[0;32m\n	[INFO]... Rotando los bvecs de acuerdo a la matriz de transformacion (Angulacion)\e[0m"
 rot=angulados.bvec
 xfmrot $trans $bvec ${tmp}/$rot
-
+echo "	Listo"
 
 
 ############## ... Invierte los vectores Y & Z ##############
@@ -124,6 +124,7 @@ b_Mtx=angulados.b 		# b-matrix para mrtrix
 
 	# Creando nuevo archivo con los vectores corregidos para Mrtrix
 	paste ${tmp}/inv_YZ.bvec $bval > ${tmp}/$b_Mtx
+echo "	Listo"
 
 
 
@@ -134,6 +135,7 @@ export eddy="`pwd`/$eddyparam"
 
 # NOTA: Aqui tienes que poner la via completa de donde esta el script ejecutable, debo de pensar en una mejor manera de hacerlo despues
 python /misc/ernst/rcruces/git_here/rrcOpen/rotateBvec.py
+echo "	Listo"
 
 
 ############### ... Nuevo mif con los vectores corregidos ############## 
@@ -143,11 +145,13 @@ paste ${b_Mtx%%.*}_rotated.bvec $bval > $grad
 
 # Crea el archivo mif 
 mrconvert -grad $grad $DWI_corr $mif
+echo "	Listo"
 
 
 
 ############## Duration ############## 
-#rm -Rv $tmp ${b_Mtx%%.*}_rotated.bvec
+rm -Rv $tmp ${b_Mtx%%.*}_rotated.bvec
+
 # Ending time
 lopuu=$(date +%s.%N)
 eri=$(echo "$lopuu - $aloita" | bc)
