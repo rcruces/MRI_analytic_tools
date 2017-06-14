@@ -106,7 +106,7 @@ fi
 
 ############### ... Rota los vectores ##############
 echo  -e "\e[0;32m\n	[INFO]... Rotando los bvecs de acuerdo a la matriz de transformacion (Angulacion)\e[0m"
-rot=${bvec%.*}_angulados.bvec
+rot=angulados.bvec
 xfmrot $trans $bvec ${tmp}/$rot
 
 
@@ -114,13 +114,13 @@ xfmrot $trans $bvec ${tmp}/$rot
 ############## ... Invierte los vectores Y & Z ##############
 echo  -e "\e[0;32m\n	[INFO]... Corrigiendo los vectores Y & Z\e[0m"
 # Este paso es especial para los datos obtenidos del Philips Achieva Tx 3.0T!!!
-b_Mtx=${rot%%.*}.b 		# b-matrix para mrtrix
+b_Mtx=angulados.b 		# b-matrix para mrtrix
 
 	# bvec - multiplicando Z y Y por -1
-	awk '{print $1,-$2,-$3}' $rot > ${tmp}/tmp_YZ.bvec
+	awk '{print $1,-$2,-$3}' $rot > ${tmp}/inv_YZ.bvec
 
 	# Creando nuevo archivo con los vectores corregidos para Mrtrix
-	paste ${tmp}/tmp_YZ.bvec $bval > ${tmp}/$b_Mtx
+	paste ${tmp}/inv_YZ.bvec $bval > ${tmp}/$b_Mtx
 
 
 
@@ -143,7 +143,7 @@ mrconvert -grad $grad $DWI_corr $mif
 
 
 ############## Duration ############## 
-rm -Rv $tmp ${b_Mtx%%.*}_rotated.bvec
+#rm -Rv $tmp ${b_Mtx%%.*}_rotated.bvec
 # Ending time
 lopuu=$(date +%s.%N)
 eri=$(echo "$lopuu - $aloita" | bc)
