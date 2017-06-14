@@ -47,7 +47,7 @@ raulrcruces@inb.unam.mx
 if [ $# -lt 6 ]
 then
 	echo -e "\e[0;31m\n[ERROR]...Falta algun argumento: \e[0m"
-	echo -e "	Matriz omat: $1 \nbvecs: $2 \nbvals: $3 \nCorrected.eddy: $4 DWI_corregido: $5 \nNuevo nombre: $6"
+	echo -e "	Matriz omat: $1 \n	bvecs: $2 \n	bvals: $3 \n	Corrected.eddy: $4 \n	DWI_corregido: $5 \n	Nuevo nombre: $6"
 	print_help
 	exit 1
 fi
