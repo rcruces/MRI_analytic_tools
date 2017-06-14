@@ -4,21 +4,29 @@ echo "
 
 Corrige los vectores de difusión asociados a la direccion (bvecs) en caso de que la adquisición tenga una rotación.
 Esta basado en los archivos que se obtienen del formato PAR/REC de Philips Achieva TX 3T, pero en teoria la correción de vectores para cualquier formato requiere de los siguientes pasos:
+
 	1.Obtener la matriz de rotación. 
 	  Para los archivos PAR/REC es el archivo '.omat' que se obtienes tras usar PARconv_v1.12.sh
 	  omat es un archivo de texto que representa una matriz de 4x4 
-	2.Rota los vectores. 
+
+	2.Rotar los vectores. 
 	  Multiplicación de los vectores bvecs por la matriz omat
-	3.Inviertir Y y Z de los bvecs. 
+
+	3.Invertir Y y Z de los bvecs. 
 	  Multiplica por -1 la coordenada Y & Z de los bvecs.
+
 	4.Multiplica por la transformación de eddy. 
 	  Multiplica los vectores rotados e invertidos por la matriz de transformación para cada volumen DWI que se obtienes tras usar eddy FSL.
-	  Hay una matriz asociada a cada volumen o sea cada fila XYZ tiene una transformación asociada.
+	  Hay una matriz asociada a cada volumen o sea a cada fila XYZ tiene una transformación asociada.
+
 	5.Genera un nuevo mif
 	  Usa los vectores corregidos para crear un archivo mif con herramientas de mrtrix
 
 
-Raul R(
+
+NOTA: bvec y bval deben estar en formato COLUMNA!!!
+
+
 
 Example :
 	`basename $0` DWI.nii.gz DWI.bvecs DWI.bvals corrected.eddy DWI_corrected.nii.gz
@@ -26,7 +34,8 @@ Example :
 		DWI.bvecs		Son los bvecs del volumen DWI
 		DWI.bvals		Son los bvals del volumen DWI
 		corrected.eddy		parametros corregidos de eddy
-		DWI_corrected.nii.gz 	El NIFTI corregido por eddy/topup
+		DWI_corrected.nii.gz 	El NIFTI corregido por eddy & topup
+		Out_name		Archivo mif con bvecs corregidos
 
 Raul RC
 INB, Jul 2017
@@ -34,102 +43,110 @@ raulrcruces@inb.unam.mx
 
 "
 }
-if [ $# -lt 5 ]
+
+if [ $# -lt 6 ]
 then
-	echo "Error needs the folder's name..."
+	echo -e "\e[0;31m\n[ERROR]...Falta algun argumento: \e[0m"
+	echo -e "	Matriz omat: $1 \nbvecs: $2 \nbvals: $3 \nCorrected.eddy: $4 DWI_corregido: $5 \nNuevo nombre: $6"
 	print_help
 	exit 1
 fi
-source `which my_do_cmd`
-#Set fsl5.0.9
+
+c=`wc -l $2 | awk '{print $1}'`
+if ((c == 3)); 
+then
+	echo -e "\e[0;31m\n[ERROR]...bvecs estan en formato FILA, cambiar a COLUMNAS \e[0m"
+	exit 0 
+fi
+
+c=`wc -l $3 | awk '{print $1}'`
+if ((c == 1)); 
+then
+	echo -e "\e[0;31m\n[ERROR]...bvals estan en formato FILA, cambiar a COLUMNA \e[0m"
+	exit 0 
+fi
+
+############## parameters ############## 
+# Setting: mrtrix3 update, docmd & time
 source /home/inb/lconcha/fmrilab_software/tools/setup_mrtrix3_git.sh
-d1=$(date +"%T")
+aloita=$(date +%s.%N)
 
 ############## Variables ############## 
-nii=$1
+trans=$1
 bvec=$2
 bval=$3
 eddyparam=$4
 DWI_corr=$5
-trans=$6
+nom=$6
+mif=${nom%%.*}.mif
 
-#trans=${nii%%.*}_transform.txt
-mif=${nii%%.*}_corregidos.mif
+if [ -f $mif ]; then 
+	echo -e "\e[0;31m\n[ERROR]...Ya existe un archivo  llamado $mif \e[0m"; exit 123; 
+fi
 
-if [ -f $mif ]; then rm -R $mif; fi
-############### [PASO_1]... Vectores de DWI60 ##############
-## Genera un archivo con la transformacion
-#mrinfo $nii > tmp.txt
-#cat tmp.txt | awk 'NR==12,NR==14 {print $1,$2,$3,$4}' > tmp_yz
-#cat tmp.txt | awk 'NR==11 {print $2,$3,$4,$5}' > tmp_x
-#cat tmp_x tmp_yz > $trans
-#rm -R tmp*
-#echo "
-#[INFO]...	Paso1 Completado - Obtención de la matriz de transformacion"
+# Starting!
+echo -e "\e[0;44m \n Correccion de vectores de DWI y creacion de mif \n\e[0m"; 
+echo -e "Parametros:	\nMatriz omat: $1 \nbvecs: $2 \nbvals: $3 \nCorrected.eddy: $4 DWI_corregido: $5 \nNuevo nombre: $6"
 
-############### [PASO_2]... Rota los vectores ##############
-#trans=${nii%%.*}_to0.omat
-rot=${bvec%.*}_rotados.bvec
-xfmrot $trans $bvec $rot
+# Crea un directorio para archivos temporales, al final se borrara
+tmp=/tmp/vectorCorr_$$
+mkdir $tmp
+echo "Directorio con archivos temporales en $tmp"
 
-echo "
-[INFO]...	Paso2 Completado - Vectores rotados de acuerdo a la matriz de transformacion"
+############### ... filas en blanco?? ##############
+c=grep -c "^\s*$" $bvec
+if ((c > 0)); 
+then
+	echo  -e "\e[0;32m\n	[INFO]... Borrando filas en blanco de bvals & bvecs \e[0m"
+	sed -i '/^\s*$/d' $bvec
+	sed -i '/^\s*$/d' $bval
+fi
 
-############## [PASO_3]... Invierte los vectores Y & Z ##############
+
+
+############### ... Rota los vectores ##############
+echo  -e "\e[0;32m\n	[INFO]... Rotando los bvecs de acuerdo a la matriz de transformacion (Angulacion)\e[0m"
+rot=${bvec%.*}_angulados.bvec
+xfmrot $trans $bvec ${tmp}/$rot
+
+
+
+############## ... Invierte los vectores Y & Z ##############
+echo  -e "\e[0;32m\n	[INFO]... Corrigiendo los vectores Y & Z\e[0m"
 # Este paso es especial para los datos obtenidos del Philips Achieva Tx 3.0T!!!
 b_Mtx=${rot%%.*}.b 		# b-matrix para mrtrix
 
-	# Borra las lineas en blanco
-#	sed -i '/^\s*$/d' ${dwi%%.*}.bvec
-#	sed -i '/^\s*$/d' ${AP_dwi%%.*}.bvec
-
 	# bvec - multiplicando Z y Y por -1
-	awk '{print $1,-$2,-$3}' $rot > tmp_YZ.bvec
+	awk '{print $1,-$2,-$3}' $rot > ${tmp}/tmp_YZ.bvec
 
 	# Creando nuevo archivo con los vectores corregidos para Mrtrix
-	paste tmp_YZ.bvec $bval > $b_Mtx
-echo "
-[INFO]...	Paso3 Completado - Corrección de vectores Y & Z $b_Mtx
-"
+	paste ${tmp}/tmp_YZ.bvec $bval > ${tmp}/$b_Mtx
 
-############## [PASO_4]... Multiplica por la transformación de eddy ############## 
-export bvec_Pos="`pwd`/$b_Mtx"
+
+
+############## ... Multiplica por la transformación de eddy ############## 
+echo  -e "\e[0;32m\n	[INFO]... Rotando vectores por las transformaciones de edyy/topup\e[0m"
+export bvec_Pos="${tmp}/$b_Mtx"
 export eddy="`pwd`/$eddyparam"
-python /misc/ernst/rcruces/scrips/dwi60/rotatesBvecs.py
-echo "
-[INFO]...	Paso4 Completado - b-matrix corregidos
-"
+python rotateBvec.py
 
-############### [PASO_5]... Nuevo mif con los vectores corregidos ############## 
-grad=${nii%%.*}_corregidos.b
+
+
+############### ... Nuevo mif con los vectores corregidos ############## 
+echo  -e "\e[0;32m\n	[INFO]... Creando archivo DWI.mif con vectores corregidos \e[0m"
+grad=${nom%%.*}_corregidos.b
 paste ${b_Mtx%%.*}_rotated.bvec $bval > $grad
 
 # Crea el archivo mif 
-fake=""
-my_do_cmd $fake mrconvert -grad $grad $DWI_corr $mif
-echo "
-mif - DWI mif creado
-"
-# Crea una mascara binaria
-mask=${mif/.mif/_mask.mif}
-fake=""
-my_do_cmd $fake dwi2mask -force $mif $mask
-echo "mif - Estimación de mascara binaria
-"
-# Corrige el biasfiel
-bias=${mif/.mif/_bias.mif}
-fake=""
-my_do_cmd $fake dwibiascorrect -force -ants -mask $mask $mif $mif
-echo "mif - Corrección de intesidad del gradiente
-"
-echo "
-[INFO]...	Paso5 Completado - Nuevo DWI mif creado
-"
-rm tmp* $mask $b_Mtx ${b_Mtx%%.*}_rotated.bvec $rot
-############### Duration ############## 
-d2=$(date +"%T")
-echo "
-	COMIENZO: 	$d1
-	TERMINO:	$d2
-"
+mrconvert -grad $grad $DWI_corr $mif
+
+
+
+############## Duration ############## 
+rm -Rv $tmp ${b_Mtx%%.*}_rotated.bvec
+# Ending time
+lopuu=$(date +%s.%N)
+eri=$(echo "$lopuu - $aloita" | bc)
+echo -e "\033[38;5;220m TOTAL running time: ${eri} seconds \n\033[0m"
+
 
