@@ -10,3 +10,7 @@ This requires and updated version or **mrtrix**, the angled matrix from the adqu
 > 3. Change line 134 of `vector_corr` to you local path.  
   
 >*Further reading:* Leemans, A., & Jones, D. K. (2009). The B‐matrix must be rotated when correcting for subject motion in DTI data. Magnetic resonance in medicine, 61(6), 1336-1349.  
+ 
+## Connectome Prediction Modeling CPM
+This is the R implementation (originally in matlab) for a connectome-based predictive modeling to predict individual behavior from brain connectivity as described in *SHEN, Xilin, et al. Using connectome-based predictive modeling to predict individual behavior from brain connectivity. nature protocols, 2017, vol. 12, no 3, p. 506-518.*.  
+I included an example of how this method would ideally work if you have a multiple strong linear relations between the connectomes $W_{ij}$ and the cognitive feature.  
