@@ -2,7 +2,7 @@
 Tools for everyone!  
 Also check my code for some nice [R plots](https://github.com/rcruces/R-graph).  
 
-![alt text](https://farm3.staticflickr.com/2019/2197059771_7179f83ed1_z.jpg)  
+![intro](https://farm3.staticflickr.com/2019/2197059771_7179f83ed1_z.jpg)  
   
 ## Table of Contents  
 1. [Vector Correction for DWI data](#vector-correction-for-dwi-data)
