@@ -18,7 +18,7 @@ This requires and updated version or **mrtrix**, the angled matrix from the adqu
 # Freesurfer preprocessing  
 A practical guideline for the preprocessing of T1 weighted images with FreeSurfer. For further information and detailles check the official webpage [here](https://surfer.nmr.mgh.harvard.edu/).  
 - This guideline requires the previous installation of [Advance Normalization Tools](https://stnava.github.io/ANTs/) (ANTs), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall), and [minc-toolkit](https://github.com/BIC-MNI/minc-toolkit).  
-- You can find the tutorial in [/Freesurfer_preprocessing]().
+- You can find the tutorial in [/Freesurfer_preprocessing](https://github.com/rcruces/MRI_analytic_tools/tree/master/Freesurfer_preprocessing).
   
 # Connectome Prediction Modeling CPM
 This is the **R implementation** (originally in matlab) for a connectome-based predictive modeling to predict individual behavior from brain connectivity as described in [Shen et al.](https://www.nature.com/articles/nprot.2016.178).  
