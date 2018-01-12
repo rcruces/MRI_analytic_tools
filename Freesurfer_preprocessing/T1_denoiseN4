@@ -3,11 +3,10 @@ print_help() {
 echo "
 Usage:
 
-`basename $0` NIFTI output_directory
+	`basename $0` NIFTI output_directory
 
 This script aplies a non-local-means denoising using minc-toolkit and the N4 bias field correction from ANTs. 	
-
-NOTE: this script REQUIRES previous instalation of FreeSurfer, minc-toolkit & ANTs.
+NOTE: this script REQUIRES previous installation of FreeSurfer, minc-toolkit & ANTs.
 
 Raul RC
 INB, January, 2018
@@ -17,29 +16,39 @@ raulrcruces@inb.unam.mx
 }
 
 ######### HELP ######### 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
 then
-	echo -e "\e[0;31m\n[ERROR]... \tArgument missing: \n\e[0m\n\tNifti: $1\n\tOutput directory:$2"
+	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\e[0m\t\tNifti: $1\n\t\tOutput directory:$2"
 	print_help
 	exit 1
 fi
 
 # --------------------------------------------------------------- # 
-# 			Starting Requirements
+# 		Starting Requirements & Warnings
 # --------------------------------------------------------------- # 
- 
-#---------------- Declaring variables ----------------#
 NII=$1
+outdir=$2
 
+echo -e "\033[48;5;22m\n[INIT]\t\tDenoise & Bias Field Correction of file $NII\n\033[0m"
+
+#---------------- Declaring variables ----------------#
 tmp=/tmp/dnsN4_$RANDOM
 id=`echo $NII | awk -F . '{print $1}'`
-out=${id}_dn4.nii.gz
+out=${tmp}/${id}_dn4.nii.gz
+outfile=$outdir/${id}_dn4.nii.gz
 mnc=${tmp}/${id}_mnc.mnc
 mncdn=${tmp}/${id}_mnc_nlm.mnc
 
+if [ ! -f $NII ]; then echo -e "\e[0;31m\n[ERROR]... File not found: $NII\n\e[0m"; exit 2; fi
+if [ ! -d $outdir ]; then echo -e "\e[0;31m\n[ERROR]... Directory not found: $outdir\n\e[0m"; exit 2; fi
+if [ ${NII#*.} = "nii.gz" ]; then echo -e "\t[INFO]... $NII has the correct format"; else echo -e "\e[0;31m\n[ERROR]... $NII must be a compressed nifti, with extension 'nii.gz'\n\e[0m"; exit 0; fi
+if [ ! -f `which mri_convert` ]; then echo -e "\e[0;31m\n[ERROR]... Check your FreeSurfer installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... FreeSurfer seems to work."; fi
+if [ ! -f `which mincnlm` ]; then echo -e "\e[0;31m\n[ERROR]... Check your minc-toolkit installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... minc-toolkit seems to work."; fi
+if [ ! -f `which N4BiasFieldCorrection` ]; then echo -e "\e[0;31m\n[ERROR]... Check your ANTs installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... ANTs seems to work."; fi
+if [ -f $outfile ]; then echo -e "\e[0;31m\n[ERROR]... Outfile already exist: $outfile\n\e[0m"; exit 0; fi
+
 #---------------- Timer & Beginning ----------------#
 aloita=$(date +%s.%N)
-echo -e "\033[48;5;22m\n[INIT]... \tDenoise & Bias Field Correction of  file $NII\n\033[0m"
 
 
 
@@ -47,7 +56,6 @@ echo -e "\033[48;5;22m\n[INIT]... \tDenoise & Bias Field Correction of  file $NI
 mkdir $tmp
 echo  -e "\033[38;5;45m\n[INFO]... tmp directory: \033[0m"
 echo   -e "\033[38;5;208mDIR -->\t $tmp\033[0m"
-
 
 
 #---------------- Converts T1 nifti to minc format and back to T1  ----------------#
@@ -61,17 +69,17 @@ echo  -e "\033[38;5;45m\n[INFO]... Transformando de minc a nifti \033[0m"
 mri_convert ${mncdn} $out
 
 echo  -e "\033[38;5;45m\n[INFO]... N4 bias field correction \033[0m"
-N4BiasFieldCorrection -d 3 -i $out -o $out
+N4BiasFieldCorrection -d 3 -i $out -o $outfile
 
 
 
 #----------- Removes temporal directory -----------#
 echo -e "\033[38;5;45m\n[INFO]... Removing temporal files: $tmp\e[0m"
- rm -Rv $tmp
+rm -Rv $tmp
 
 
 #----------- Outfile -----------#
-echo  -e "\033[38;5;45m\n[INFO]... Outfile: ${out} \033[0m"
+echo  -e "\033[38;5;45m\n[INFO]... Outfile: ${outfile} \033[0m"
 
 
 #----------- Total Time -----------#
