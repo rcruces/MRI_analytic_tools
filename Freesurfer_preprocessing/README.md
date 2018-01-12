@@ -1,20 +1,28 @@
-# ... Under developement ...  
+![intro](https://farm5.staticflickr.com/4674/24783541397_0aaf0dcf80_z.jpg)  
+ 
 
 # Guideline for Fresurfing preprocessing  
 ## Step 1... T1 weighted volume Quality Check & ordering
-1. Visual inspection must be carry out in order to exclude T1-weighted volumes with ... such as:
-- Extreme motion  
-- Deformations  
+1. Visual inspection must be carry out in order to exclude T1-weighted volumes with artifacts such as:
+- Motion  
+- Magnetic suceptibility  
+- RF overflow (clipping)  
+- RF spike  
+- Bad encoding  
 - Incomplete or croped volumes.  
+After identifying the images with artifacts they must be excluded or repaired. If this step is not done properly, extremely poor segmentation or failure is expeted from FreeSurfer.
+  
+> Further reading of MRI artifacts:  
+> Morelli, J. N., Runge, V. M., Ai, F., Attenberger, U., Vu, L., Schmeets, S. H., ... & Kirsch, J. E. (2011). An image-based approach to understanding the physics of MR artifacts. Radiographics, 31(3), 849-866. [https://doi.org/10.1148/rg.313105115](https://doi.org/10.1148/rg.313105115)  
   
 2. Once T1-QC is done, you should create a directory where all the images will be placed.  
 ```{bash}
 mkdir <path>/FS_timing
 ```  
-\t> 2.1 Each T1 image should have an identifier for example; `FS_000.nii.gz`.   
+3. Each T1 image should have an identifier for example; `FS_000.nii.gz`.   
   
-3. For a better output of the freesurfer algorith it is highly recomended to perform a *denoising* and *bias field correction* of each T1.  
-\t> The script [`denoiseN4`]() can be use to asses this point, further information is detailled inside it.  
+4. For a better output of the freesurfer algorith it is highly recomended to perform a *denoising* and *bias field correction* of each T1.  
+ >The script [`denoiseN4`]() can be use to asses this point, further information is detailled inside it.  
 ```{bash}
 mkdir <path>/FS_timing/input <path>/FS_timing/output
 ```  
