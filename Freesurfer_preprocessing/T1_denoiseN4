@@ -1,0 +1,88 @@
+#!/bin/bash
+print_help() {
+echo "
+Usage:
+
+`basename $0` NIFTI output_directory
+
+This script aplies a non-local-means denoising using minc-toolkit and the N4 bias field correction from ANTs. 	
+
+NOTE: this script REQUIRES previous instalation of FreeSurfer, minc-toolkit & ANTs.
+
+Raul RC
+INB, January, 2018
+raulrcruces@inb.unam.mx
+
+"
+}
+
+######### HELP ######### 
+if [ $# -lt 1 ]
+then
+	echo -e "\e[0;31m\n[ERROR]... \tArgument missing: \n\e[0m\n\tNifti: $1\n\tOutput directory:$2"
+	print_help
+	exit 1
+fi
+
+# --------------------------------------------------------------- # 
+# 			Starting Requirements
+# --------------------------------------------------------------- # 
+ 
+#---------------- Declaring variables ----------------#
+NII=$1
+
+tmp=/tmp/dnsN4_$RANDOM
+id=`echo $NII | awk -F . '{print $1}'`
+out=${id}_dn4.nii.gz
+mnc=${tmp}/${id}_mnc.mnc
+mncdn=${tmp}/${id}_mnc_nlm.mnc
+
+#---------------- Timer & Beginning ----------------#
+aloita=$(date +%s.%N)
+echo -e "\033[48;5;22m\n[INIT]... \tDenoise & Bias Field Correction of  file $NII\n\033[0m"
+
+
+
+#---------------- Temporal directory ----------------# 
+mkdir $tmp
+echo  -e "\033[38;5;45m\n[INFO]... tmp directory: \033[0m"
+echo   -e "\033[38;5;208mDIR -->\t $tmp\033[0m"
+
+
+
+#---------------- Converts T1 nifti to minc format and back to T1  ----------------#
+echo  -e "\033[38;5;45m\n[INFO]... Creando un archivo minc \033[0m"
+mri_convert $NII ${mnc}
+
+echo  -e "\033[38;5;45m\n[INFO]... Aplicando la limpieza de ruido con non-local means \033[0m"
+mincnlm ${mnc} ${mncdn}
+
+echo  -e "\033[38;5;45m\n[INFO]... Transformando de minc a nifti \033[0m"
+mri_convert ${mncdn} $out
+
+echo  -e "\033[38;5;45m\n[INFO]... N4 bias field correction \033[0m"
+N4BiasFieldCorrection -d 3 -i $out -o $out
+
+
+
+#----------- Removes temporal directory -----------#
+echo -e "\033[38;5;45m\n[INFO]... Removing temporal files: $tmp\e[0m"
+ rm -Rv $tmp
+
+
+#----------- Outfile -----------#
+echo  -e "\033[38;5;45m\n[INFO]... Outfile: ${out} \033[0m"
+
+
+#----------- Total Time -----------#
+lopuu=$(date +%s.%N)
+eri=$(echo "$lopuu - $aloita" | bc)
+echo -e "\\033[38;5;220m \n TOTAL running time: ${eri} seconds \n \\033[0m"
+
+
+
+
+
+
+
+
