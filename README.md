@@ -2,7 +2,7 @@
 Tools for everyone!  
 Also check my code for some nice [R plots](https://github.com/rcruces/R-graph).  
 
-![intro](https://farm5.staticflickr.com/4709/38930332034_8cf524292d_z.jpg)  
+![intro](https://farm5.staticflickr.com/4709/38930332034_2d9b7a79aa_o.png)  
   
 ## Table of Contents  
 1. [Vector Correction for DWI data](#vector-correction-for-dwi-data)
@@ -16,7 +16,7 @@ This requires and updated version or **mrtrix**, the angled matrix from the adqu
 >*Reference:* Leemans, A., & Jones, D. K. (2009). The B‐matrix must be rotated when correcting for subject motion in DTI data. Magnetic resonance in medicine, 61(6), 1336-1349.  
  
 # Freesurfer preprocessing  
-A practical guideline for the preprocessing of T1 weighted images with FreeSurfer. For further information and detailles check the official webpage [here](https://surfer.nmr.mgh.harvard.edu/).  
+A practical [guideline](https://github.com/rcruces/MRI_analytic_tools/tree/master/Freesurfer_preprocessing) for the preprocessing of T1 weighted images with FreeSurfer. For further information and detailles check the official webpage [here](https://surfer.nmr.mgh.harvard.edu/).  
 - This guideline requires the previous installation of [Advance Normalization Tools](https://stnava.github.io/ANTs/) (ANTs), [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall), and [minc-toolkit](https://github.com/BIC-MNI/minc-toolkit).  
 - You can find the tutorial in [/Freesurfer_preprocessing](https://github.com/rcruces/MRI_analytic_tools/tree/master/Freesurfer_preprocessing).
   
