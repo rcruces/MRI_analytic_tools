@@ -54,25 +54,42 @@ After identifying the images with artifacts they must be excluded or repaired. I
   
 ## Step 2: FreeSurfer enviroment configuration  
 ### 2.1. FreeSurfer_HOME  
-Once FreeSurfer is installed you should check if the variable `FREESURFER_HOME` is declared in the global enviroment. You can check if it's declared writing on the terminal:  
-> `env | grep FREESURFER_HOME`  
+Once FreeSurfer is installed you should check if the variable `FREESURFER_HOME` is declared in the global enviroment. You can check if it's declared by writing on the terminal:  
+```{bash}
+ `env | grep FREESURFER_HOME`  
+```  
 	or  
-> `echo $FREESURFER_HOME`.  
+```{bash}
+ `echo $FREESURFER_HOME`.  
+```  
   
 ### 2.2. FreeSurfer Configuration  
 Check the FreeSurfer configuration typing on the terminal:  
-> ```{bash}
+```{bash}
 source $FREESURFER_HOME/SetUpFreeSurfer.sh
 ```  
 
 ### 2.3 Subject's Directory  
-Se debe de declarar el directorio de entrada en el ambiente global como `SUBJECTS_DIR`. Hay dos opciones para esto, escribirla en `~/.bashrc` o declararla antes del análisis:  
-> `setenv SUBJECTS_DIR <path>/FS_timing/input`  
-o en el archivo ~/.bashrc:  
-> `export SUBJECTS_DIR=/misc/ernst/rcruces/FS_ejemplo`
+Now it's time to declare the directory where all the processed T1 are located as a local variable named; `SUBJECTS_DIR`. We have two options to achieve this.  
+OPTION 1  
+   1. Open the file `~/.bashrc` with your favorite text editor (nano, vim, gedit etc).
+   2. At the end of the file add the next lines:  
+```{bash}
+# Freesurfer Subjects Directory
+export SUBJECTS_DIR=<path>/T1_processed  
+```
+   3. Save the changes and open a new terminal or update the bash by typing `bash` on the terminal.  
   
-## Step 3: Running recon_all  
-1. Para todos los sujetos (identificación, ej. `FS_000`) hay que correr el mismo comando dentro de $SUBJECTS_DIR:  
+OPTION 2  
+This one is described on the FreeSurfer webpage, just type this on the terminal  
+```{bash}
+`setenv SUBJECTS_DIR <path>/FS_timing/input`  
+```  
+  
+  
+## Step 3: Finally Running FreeSurfer  
+#### 3.1. Running `recon_all`
+Para todos los sujetos (identificación, ej. `FS_000`) hay que correr el mismo comando dentro de $SUBJECTS_DIR:  
 ```{bash}
 recon-all –i FS_000.nii.gz –s FS_000 –all;  
 mv FS_000 <path>/FS_timing/output`
@@ -81,9 +98,9 @@ quizá sea posible hacer esto también:
 ```{bash}
 recon-all –i FS_000.nii.gz –s <path>/FS_timing/output/FS_000 –all;  
 ```  
-For further information che the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
+For further information check the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
 
-## Step 4: Visual Quality Check of the freesurfer output  
+## Step 4: Visual Quality Check of the FreeSurfer output  
 1. Individual QC
   
   
