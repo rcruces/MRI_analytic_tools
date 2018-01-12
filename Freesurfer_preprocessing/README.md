@@ -3,10 +3,10 @@
 
 # Guideline for FreSurfer Preprocessing  
 ## Step 1: T1 Volumes Ordering & Quality Check  
-### **1.1.** T1 management  
-   1. Each T1 image should have an identifier, for example; `subj_001.nii.gz`.  
+### **1.1.** T1 Management  
+   1. Each T1 image should have an identifier, for example; `T1_001.nii.gz`.  
    1. Create a new directory on your local computer where all the images will be placed.  
->	NOTE: replace `<path>` for your directory.  
+>	NOTE: replace `<path>` for your local path.  
 ```{bash}
 	mkdir <path>/T1_niftis
 ```  
@@ -19,20 +19,31 @@ Visual inspection must be carry out in order to exclude T1-weighted volumes with
    1. RF spike  
    1. Bad encoding  
    1. Incomplete or croped volumes.  
-ON the following figure you can see the most common T1-artifacts:  
+  
+On the following figure you can see the most common T1-artifacts:  
 ![T1 artifacts](https://farm5.staticflickr.com/4710/24784057227_2d716a04b9_z.jpg)  
+  
 After identifying the images with artifacts they must be excluded or repaired. If this step is not done properly, extremely poor segmentation or failure is expected from FreeSurfer.
    
 > Further reading of MRI artifacts:  
 > Morelli, J. N., Runge, V. M., Ai, F., Attenberger, U., Vu, L., Schmeets, S. H., ... & Kirsch, J. E. (2011). An image-based approach to understanding the physics of MR artifacts. Radiographics, 31(3), 849-866. [https://doi.org/10.1148/rg.313105115](https://doi.org/10.1148/rg.313105115)  
   
-### **1.4.** T1 denoise and Bias Field correction 
-For a better output of the FreeSurfer algorithm it is highly recomended to perform *denoising* and *bias field correction* of each T1. This step will aid to increase the contrast between gray and white matter and reduce the signal to noise ratio, thus improving and facilitating the FS segmentation.  
- >The script [`T1_denoiseN4`]() can be use to asses this point, further information is detailled inside it.  
+### **1.4.** T1 Denoise and Bias Field Correction (N4) 
+   1. For a better output of the FreeSurfer algorithm it is highly recomended to perform *denoising* and *bias field correction* of each T1. This step will aid to increase the contrast between gray and white matter and reduce the signal to noise ratio, thus improving and facilitating the FS segmentation.  
+   1. Figure with a sagital and axial view of a T1 with and without denoise and bias field correction.
+![T1 denoised](https://farm5.staticflickr.com/4761/24785957987_27c9f2c548_z.jpg)  
+   1. The script [`T1_denoiseN4`](https://github.com/rcruces/MRI_analytic_tools/blob/master/Freesurfer_preprocessing/T1_denoiseN4) can be use to asses this point, further information is detailled inside it. It uses minc-toolkit, FS and ANTs  
+      1. Create a new directory where all the processed T1 will be placed:
 ```{bash}
-	mkdir <path>/FS_timing/input <path>/FS_timing/output
+		 mkdir <path>/T1_processed
 ```  
-
+      1. Run the denoise and N4 for each T1: `T1_denoiseN4 T1_001.nii.gz <path>/T1_processed`
+      1. You can do a `for` loop like in the next example:
+```{bash}
+		 for subject in  <path>/T1_niftis/*; do
+			 T1_denoiseN4 $subject <path>/T1_processed;
+		 done
+```    
   
 ## Step 2: FreeSurfer enviroment configuration  
 1. FREESURFER_HOME debe ser una variable declarada en el `env`. Se puede revisar con `env | grep FREESURFER_HOME` o `echo $FREESURFER_HOME`.  
