@@ -1,7 +1,7 @@
 ![intro](https://farm5.staticflickr.com/4674/24783541397_0aaf0dcf80_z.jpg)  
  
 
-# Guideline for FreSurfer Preprocessing  
+# Guideline for FreeSurfer Preprocessing  
 ## Step 1: T1 Ordering & Quality Check  
 ### **1.1.** T1 Management  
    1. Each T1 image should have an identifier, for example; `T1_001.nii.gz`.  
@@ -33,18 +33,22 @@ After identifying the images with artifacts they must be excluded or repaired. I
    1. Figure with a sagital and axial view of a T1 with and without denoise and bias field correction.
 ![T1 denoised](https://farm5.staticflickr.com/4761/24785957987_27c9f2c548_z.jpg)  
    1. The script [`T1_denoiseN4`](https://github.com/rcruces/MRI_analytic_tools/blob/master/Freesurfer_preprocessing/T1_denoiseN4) can be use to asses this point, further information is detailled inside it. It uses minc-toolkit, FS and ANTs  
-      3a. Create a new directory where all the processed T1 will be placed:
+   3a. Create a new directory where all the processed T1 will be placed:
 ```{bash}
 		 mkdir <path>/T1_processed
 ```  
-      3b. Run the denoise and N4 for each T1:  
-```{bash}		 `T1_denoiseN4 T1_001.nii.gz <path>/T1_processed` ```    
-      3c. You can do a `for` loop like in the next example:
+
+   3b. Run the denoise and N4 for each T1:  
+```{bash}
+		 T1_denoiseN4 T1_001.nii.gz <path>/T1_processed
+```  
+
+   3c. You can do a `for` loop like in the next example:
 ```{bash}
 		 for subject in  <path>/T1_niftis/*; do
 			 T1_denoiseN4 $subject <path>/T1_processed;
 		 done
-```    
+```  
   
 ## Step 2: FreeSurfer enviroment configuration  
 1. FREESURFER_HOME debe ser una variable declarada en el `env`. Se puede revisar con `env | grep FREESURFER_HOME` o `echo $FREESURFER_HOME`.  
