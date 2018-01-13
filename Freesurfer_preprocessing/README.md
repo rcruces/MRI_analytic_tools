@@ -136,7 +136,8 @@ This is an extremely important step and maybe the most tedious!
 	FSview ${SUBJECTS_DIR}/T1_001
 ```  
 2. Watch this [FreeSurfer Troubleshooting Video](https://www.youtube.com/watch?v=gf0BC0xs0tM&feature=youtu.be) to learn more about finding and fixing errors.  
-3. After visual QC and fixing all troubleshooting from your sample, and only then you can go to step 5.
+3. After visual QC and fixing all troubleshooting from your sample, and only then you can go to step 5.  
+![freeview](https://farm5.staticflickr.com/4711/39658495511_df8b10f1c0_o.png)
   
 ## Step 5: Time for Analysis  
 Pick your favorite method to analyse your data, for example:  
