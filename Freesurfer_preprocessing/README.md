@@ -1,7 +1,12 @@
-![intro](https://farm5.staticflickr.com/4674/24783541397_0aaf0dcf80_z.jpg)  
- 
-
 # Guideline for FreeSurfer Preprocessing  
+## Table of Contents  
+1. [T1 Ordering & Quality Check](#t1-ordering-&-quality-check)  
+1. [FreeSurfer Enviroment Configuration](#freeSurfer-enviroment-configuration)  
+1. [Finally Running FreeSurfer](#finally-running-freesurfer)  
+1. [Quality Check of the FreeSurfer Output](#quality-check-of-the-freesurfer-output)  
+1. [Time for Analysis](#time-for-analysis)  
+  
+  
 ## Step 1: T1 Ordering & Quality Check  
 ### 1.1. T1 Management  
    1. Each T1 image should have an identifier, for example; `T1_001.nii.gz`.  
@@ -52,7 +57,7 @@ After identifying the images with artifacts they must be excluded or repaired. I
 		 done
 ```  
   
-## Step 2: FreeSurfer enviroment configuration  
+## Step 2: FreeSurfer Enviroment Configuration  
 ### 2.1. FreeSurfer_HOME  
 Once FreeSurfer is installed you should check if the variable `FREESURFER_HOME` is declared in the global enviroment. You can check if it's declared by writing on the terminal:  
 ```{bash}
@@ -115,7 +120,7 @@ This one is described on the FreeSurfer webpage, just type this on the terminal,
 **d.** When all processing is done you will have all the NIFTIS and the FreeSurfer outputs on the same directory, you might want to change the NIFTIS to somewhere else but is up to you.  
 > For further information check the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
   
-## Step 4: Quality Check of the FreeSurfer output  
+## Step 4: Quality Check of the FreeSurfer Cutput  
 ### 4.1 Directory outputs
 Once all the processing is done, first check the log files for errors. You can also list each output directory, they should contain the folowing directories:  
 > `bem  label  mri  scripts  src  stats  surf  tmp  touch  trash`  
@@ -126,11 +131,12 @@ If something is missing check the log file for that subject and try to run the `
   
 ### 4.1 Visual Quality Check
 This is an extremely important step and maybe the most tedious!  
-1. Individual visualization of each FS output must be performed in order to check for correct segmentation. You can try the script [`FSview`]() to visualize the FS surfaces.
+1. Individual visualization of each FS output must be performed in order to check for correct segmentation. You can try the script [`FSview`](https://github.com/rcruces/MRI_analytic_tools/blob/master/Freesurfer_preprocessing/FSview) to visualize the FS surfaces.
 ```{bash}
 	FSview ${SUBJECTS_DIR}/T1_001
 ```  
-2. Watch this [FreeSurfer Troubleshooting Video](https://www.youtube.com/watch?v=gf0BC0xs0tM&feature=youtu.be) to learn more about finding and fixing errors.
+2. Watch this [FreeSurfer Troubleshooting Video](https://www.youtube.com/watch?v=gf0BC0xs0tM&feature=youtu.be) to learn more about finding and fixing errors.  
+3. After visual QC and fixing all troubleshooting from your sample, and only then you can go to step 5.
   
 ## Step 5: Time for Analysis  
 Pick your favorite method to analyse your data, for example:  
