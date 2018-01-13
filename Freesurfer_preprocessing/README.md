@@ -56,22 +56,23 @@ After identifying the images with artifacts they must be excluded or repaired. I
 ### 2.1. FreeSurfer_HOME  
 Once FreeSurfer is installed you should check if the variable `FREESURFER_HOME` is declared in the global enviroment. You can check if it's declared by writing on the terminal:  
 ```{bash}
- `env | grep FREESURFER_HOME`  
+	env | grep FREESURFER_HOME  
 ```  
 	or  
 ```{bash}
- `echo $FREESURFER_HOME`.  
+	echo $FREESURFER_HOME  
 ```  
   
 ### 2.2. FreeSurfer Configuration  
 Check the FreeSurfer configuration typing on the terminal:  
 ```{bash}
-source $FREESURFER_HOME/SetUpFreeSurfer.sh
+	source $FREESURFER_HOME/SetUpFreeSurfer.sh
 ```  
 
 ### 2.3 Subject's Directory  
-Now it's time to declare the directory where all the processed T1 are located as a local variable named; `SUBJECTS_DIR`. We have two options to achieve this.  
-OPTION 1  
+Now it's time to declare the directory where all the processed T1 are located as a local variable named `SUBJECTS_DIR`. We have two options to achieve this.  
+  
+**OPTION 1**  
    1. Open the file `~/.bashrc` with your favorite text editor (nano, vim, gedit etc).
    2. At the end of the file add the next lines:  
 ```{bash}
@@ -80,29 +81,58 @@ export SUBJECTS_DIR=<path>/T1_processed
 ```
    3. Save the changes and open a new terminal or update the bash by typing `bash` on the terminal.  
   
-OPTION 2  
-This one is described on the FreeSurfer webpage, just type this on the terminal  
+**OPTION 2**  
+This one is described on the FreeSurfer webpage, just type this on the terminal, if you are using a C-shell (csh):  
 ```{bash}
-`setenv SUBJECTS_DIR <path>/FS_timing/input`  
+	setenv SUBJECTS_DIR <path>/FS_timing/input  
 ```  
   
   
 ## Step 3: Finally Running FreeSurfer  
 #### 3.1. Running `recon_all`
-Para todos los sujetos (identificación, ej. `FS_000`) hay que correr el mismo comando dentro de $SUBJECTS_DIR:  
+`recon-all` is the fully automated command from FreeSurfer for structural processing. It takes a while for each subject (from few to 10 hours or more depending on your computer), so it's highly recommended to use a job control system such as SGE (fsl_sub)   
+1. Change your directory to $SUBJECTS_DIR  
 ```{bash}
-recon-all –i FS_000.nii.gz –s FS_000 –all;  
-mv FS_000 <path>/FS_timing/output`
+	cd $SUBJECTS_DIR
 ```  
-quizá sea posible hacer esto también:  
+1. To run the structural FreeSurfer processing for the file `T1_001.nii.gz` you should type on the terminal:  
 ```{bash}
-recon-all –i FS_000.nii.gz –s <path>/FS_timing/output/FS_000 –all;  
+	recon-all –i T1_001.nii.gz –s T1_001 –all
 ```  
-For further information check the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
+1. If you have more than one subject try a `for` loop over each T1 image.
+```{bash}
+	for subject in *.nii.gz; do
+		recon-all –i $subject –s ${subject/.nii.gz/} –all
+	done
+```  
+1. If you have a SGE cluster you can use the next code instead of the latter
+```{bash}
+	for subject in *.nii.gz; do
+		fsl_sub -l <path_to_logfiles> -R 6 recon-all –i $subject –s ${subject/.nii.gz/} –all
+	done
+```  
+1. When all processing is done you will have all the NIFTIS and the FreeSurfer outputs on the same directory, you might want to change the NIFTIS to somewhere else but is up to you.  
+> For further information check the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
 
-## Step 4: Visual Quality Check of the FreeSurfer output  
-1. Individual QC
+## Step 4: Quality Check of the FreeSurfer output  
+#### 4.1 Directory outputs
+Once all the processing is done, first check the log files for errors. You can also list each output directory, the should contain this directories:  
+> `bem  label  mri  scripts  src  stats  surf  tmp  touch  trash`  
+If you list all the contents of a particular subjects (`ls T1_001/*`) you should obtain something like this:
+![files](https://farm5.staticflickr.com/4659/27878923639_5878be0ec1_b.jpg)  
+If something is missing check the log file for that subject and try to run the `recon-all` again.  
   
+#### 4.1 Visual Quality Check
+1. This is an extremely important step and maybe the most tedious! 
+1. Watch this [FreeSurfer Troubleshooting Video](https://www.youtube.com/watch?v=gf0BC0xs0tM&feature=youtu.be) to learn more about fixing errors.
   
+## Step 5: Time for Analysis  
+Pick your favorite method to analyse your data, for example:  
+1. ROI volume analysis  
+1. Cortical thickness  
+1. Surface analysis ([SurfStat](http://www.math.mcgill.ca/keith/surfstat/))  
+1. White matter yuxtacortical analysis.  
+  
+# Thanks for reading!
 
 
