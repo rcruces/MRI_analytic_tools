@@ -1,0 +1,46 @@
+#!/bin/bash
+
+print_help() {
+echo "
+Usage:
+
+	`basename $0` Subject_dir
+
+		Subject_dir: is the path to the subject of interest
+Open the volumen of a specific subject with freeview from FreeSurfer
+
+Raul RC
+INB, January, 2018
+raulrcruces@inb.unam.mx
+
+"
+}
+
+######### HELP ######### 
+if [ $# -lt 1 ]
+then
+	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\e[0m\t\tSubject directory: $1\n"
+	print_help
+	exit 1
+fi
+
+sub_dir=$1
+#---------------- Warnings ----------------#
+if [ ! -f `which freeview` ]; then echo -e "\e[0;31m\n[ERROR]... Check your FreeSurfer installation \n\e[0m"; exit 0; fi
+if [ ! -d $sub_dir ]; then echo -e "\e[0;31m\n[ERROR]... Directory not found: $sub_dir\n\e[0m"; exit 0; fi
+if [ ! -d $SUBJECTS_DIR ]; then echo -e "\e[0;31m\n[ERROR]... SUBJECTS_DIR not found: $SUBJECTS_DIR\n\e[0m"; exit 0; fi
+
+#---------------- Opens the viewer ----------------#
+freeview -f \
+${sub_dir}/surf/lh.pial:annot=aparc.annot:name=pial_aparc:visible=0 \
+${sub_dir}/surf/lh.inflated:overlay=lh.thickness:overlay_threshold=0.1,3::name=inflated_thickness:visible=0 \
+${sub_dir}/surf/lh.inflated:visible=0 \
+${sub_dir}/surf/lh.white:visible=0 \
+${sub_dir}/surf/lh.pial \
+-f \
+${sub_dir}/surf/rh.pial:annot=aparc.annot:name=pial_aparc:visible=0 \
+${sub_dir}/surf/rh.inflated:overlay=rh.thickness:overlay_threshold=0.1,3::name=inflated_thickness:visible=0 \
+${sub_dir}/surf/rh.inflated:visible=0 \
+${sub_dir}/surf/rh.white:visible=0 \
+${sub_dir}/surf/rh.pial \
+--viewport 3d
