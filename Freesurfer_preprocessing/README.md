@@ -42,30 +42,30 @@ After identifying the images with artifacts they must be excluded or repaired. I
   
    3a. Create a new directory where all the processed T1 will be placed:
 ```{bash}
-		 mkdir <path>/T1_processed
+     mkdir <path>/T1_processed
 ```  
 
    3b. Run the denoise and N4 for each T1:  
 ```{bash}
-		 T1_denoiseN4 T1_001.nii.gz <path>/T1_processed
+     T1_denoiseN4 T1_001.nii.gz <path>/T1_processed
 ```  
 
    3c. You can do a `for` loop like in the next example:
 ```{bash}
-		 for subject in  <path>/T1_niftis/*; do
-			 T1_denoiseN4 $subject <path>/T1_processed;
-		 done
+     for subject in  <path>/T1_niftis/*; do
+          T1_denoiseN4 $subject <path>/T1_processed;
+     done
 ```  
   
 ## Step 2: FreeSurfer Enviroment Configuration  
 ### 2.1. FreeSurfer_HOME  
 Once FreeSurfer is installed you should check if the variable `FREESURFER_HOME` is declared in the global enviroment. You can check if it's declared by writing on the terminal:  
 ```{bash}
-	env | grep FREESURFER_HOME  
+     env | grep FREESURFER_HOME  
 ```  
-	or  
+or  
 ```{bash}
-	echo $FREESURFER_HOME  
+     echo $FREESURFER_HOME  
 ```  
   
 ### 2.2. FreeSurfer Configuration  
@@ -87,47 +87,49 @@ export SUBJECTS_DIR=<path>/T1_processed
    3. Save the changes and open a new terminal or update the bash by typing `bash` on the terminal.  
   
 **OPTION 2**  
-This one is described on the FreeSurfer webpage, just type this on the terminal, if you are using a C-shell (csh):  
+This one is described on the FreeSurfer webpage. if you are using a C-shell (csh), type this on the terminal:  
 ```{bash}
-	setenv SUBJECTS_DIR <path>/FS_timing/input  
+   setenv SUBJECTS_DIR <path>/FS_timing/input  
 ```  
   
   
 ## Step 3: Finally Running FreeSurfer  
 ### 3.1. Running `recon_all`
-`recon-all` is the fully automated command from FreeSurfer for structural processing. It takes a while for each subject (from few to 10 hours or more depending on your computer), so it's highly recommended to use a job control system such as SGE (fsl_sub)   
+`recon-all` is the fully automated command from FreeSurfer for structural processing. It takes a while for each subject (from few to 10 hours or more depending on your computer), so it's highly recommended to use a job control system such as SGE (fsl_sub).   
 **a.** Change your directory to $SUBJECTS_DIR  
 ```{bash}
-	cd $SUBJECTS_DIR
+cd $SUBJECTS_DIR
 ```  
 **b.** To run the structural FreeSurfer processing for the file `T1_001.nii.gz` you should type on the terminal:  
 ```{bash}
-	recon-all –i T1_001.nii.gz –s T1_001 –all
+recon-all –i T1_001.nii.gz –s T1_001 –all
 ```  
 > hint: type `recon-all` on the terminal and press `Enter key` to see more detailes about this command.  
 **c.** If you have more than one subject try a `for` loop over each T1 image.
 ```{bash}
-	for subject in *.nii.gz; do
-		recon-all –i $subject –s ${subject/.nii.gz/} –all
-	done
+for subject in *.nii.gz; do
+	recon-all –i $subject –s ${subject/.nii.gz/} –all
+done
 ```  
-**c.** If you have access to a SGE cluster you can use the next code instead of the latter
+**c.** If you have access to a SGE cluster you can use the next code instead of the latter.
 ```{bash}
-	for subject in *.nii.gz; do
-		fsl_sub -l <path_to_logfiles> -R 6 recon-all –i $subject –s ${subject/.nii.gz/} –all
-	done
+for subject in *.nii.gz; do
+			fsl_sub -l <path_to_logfiles> -R 6 recon-all –i $subject –s ${subject/.nii.gz/} –all
+done
 ```  
 **d.** When all processing is done you will have all the NIFTIS and the FreeSurfer outputs on the same directory, you might want to change the NIFTIS to somewhere else but is up to you.  
-> For further information check the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
+  
+> NOTE: For further information check the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
   
 ## Step 4: Quality Check of the FreeSurfer Cutput  
 ### 4.1 Directory outputs
 Once all the processing is done, first check the log files for errors. You can also list each output directory, they should contain the folowing directories:  
-> `bem  label  mri  scripts  src  stats  surf  tmp  touch  trash`  
+> `./bem  ./label  ./mri  ./scripts  ./src  ./stats  ./surf  ./tmp  ./touch  ./trash`  
   
 If you list all the contents of a particular subjects (`ls T1_001/*`) you should obtain something like this:
 ![files](https://farm5.staticflickr.com/4659/27878923639_5878be0ec1_b.jpg)  
-If something is missing check the log file for that subject and try to run the `recon-all` again.  
+If something is missing check the log file for that subject, try to figure out what the error is.  
+If you figure out what was the ERROR, erase the output directory for that subject and run `recon-all` again for him.  
   
 ### 4.1 Visual Quality Check
 This is an extremely important step and maybe the most tedious!  
