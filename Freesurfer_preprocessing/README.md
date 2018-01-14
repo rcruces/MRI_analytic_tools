@@ -114,7 +114,7 @@ done
 **c.** If you have access to a SGE cluster you can use the next code instead of the latter.
 ```{bash}
 for subject in *.nii.gz; do
-			fsl_sub -l <path_to_logfiles> -R 6 recon-all –i $subject –s ${subject/.nii.gz/} –all
+	fsl_sub -l <path_to_logfiles> -R 6 recon-all –i $subject –s ${subject/.nii.gz/} –all
 done
 ```  
 **d.** When all processing is done you will have all the NIFTIS and the FreeSurfer outputs on the same directory, you might want to change the NIFTIS to somewhere else but is up to you.  
