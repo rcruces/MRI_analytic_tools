@@ -3,7 +3,7 @@ print_help() {
 echo "
 Usage:
 
-	`basename $0` NIFTI output_directory
+	`basename $0` NIFTI ID output_directory
 
 This script aplies a non-local-means denoising using minc-toolkit and the N4 bias field correction from ANTs. 	
 NOTE: this script REQUIRES previous installation of FreeSurfer, minc-toolkit & ANTs.
@@ -16,9 +16,9 @@ raulrcruces@inb.unam.mx
 }
 
 ######### HELP ######### 
-if [ $# -lt 2 ]
+if [ $# -lt 3 ]
 then
-	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\e[0m\t\tNifti: $1\n\t\tOutput directory:$2"
+	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\e[0m\t\tNifti: $1\n\t\t ID: $2\n\t\tOutput directory:$3"
 	print_help
 	exit 1
 fi
@@ -27,13 +27,13 @@ fi
 # 		Starting Requirements & Warnings
 # --------------------------------------------------------------- # 
 NII=$1
-outdir=$2
+id=$2
+outdir=$3
 
 echo -e "\033[48;5;22m\n[INIT]\t\tDenoise & Bias Field Correction of file $NII\n\033[0m"
 
 #---------------- Declaring variables ----------------#
 tmp=/tmp/dnsN4_$RANDOM
-id=`echo $NII | awk -F . '{print $1}'`
 out=${tmp}/${id}_dn4.nii.gz
 outfile=$outdir/${id}_dn4.nii.gz
 mnc=${tmp}/${id}_mnc.mnc
@@ -49,7 +49,6 @@ if [ -f $outfile ]; then echo -e "\e[0;31m\n[ERROR]... Outfile already exist: $o
 
 #---------------- Timer & Beginning ----------------#
 aloita=$(date +%s.%N)
-
 
 
 #---------------- Temporal directory ----------------# 
