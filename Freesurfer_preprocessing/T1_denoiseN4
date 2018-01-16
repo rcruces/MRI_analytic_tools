@@ -18,7 +18,7 @@ raulrcruces@inb.unam.mx
 ######### HELP ######### 
 if [ $# -lt 3 ]
 then
-	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\e[0m\t\tNifti: $1\n\t\t ID: $2\n\t\tOutput directory:$3"
+	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\e[0m\t\tNifti: $1\n\t\tID: $2\n\t\tOutput directory:$3"
 	print_help
 	exit 1
 fi
@@ -41,7 +41,8 @@ mncdn=${tmp}/${id}_mnc_nlm.mnc
 
 if [ ! -f $NII ]; then echo -e "\e[0;31m\n[ERROR]... File not found: $NII\n\e[0m"; exit 2; fi
 if [ ! -d $outdir ]; then echo -e "\e[0;31m\n[ERROR]... Directory not found: $outdir\n\e[0m"; exit 2; fi
-if [ ${NII#*.} = "nii.gz" ]; then echo -e "\t[INFO]... $NII has the correct format"; else echo -e "\e[0;31m\n[ERROR]... $NII must be a compressed nifti, with extension 'nii.gz'\n\e[0m"; exit 0; fi
+format=nii.gz
+if [ "${NII/$format}" = "$NII" ] ; then echo -e "\e[0;31m\n[ERROR]... $NII must be a compressed nifti, with extension 'nii.gz'\n\e[0m"; exit 0; else echo -e "\t[INFO]... $NII has the correct format"; fi
 if [ ! -f `which mri_convert` ]; then echo -e "\e[0;31m\n[ERROR]... Check your FreeSurfer installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... FreeSurfer seems to work."; fi
 if [ ! -f `which mincnlm` ]; then echo -e "\e[0;31m\n[ERROR]... Check your minc-toolkit installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... minc-toolkit seems to work."; fi
 if [ ! -f `which N4BiasFieldCorrection` ]; then echo -e "\e[0;31m\n[ERROR]... Check your ANTs installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... ANTs seems to work."; fi
