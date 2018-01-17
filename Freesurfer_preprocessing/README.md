@@ -102,19 +102,19 @@ cd $SUBJECTS_DIR
 ```  
 **b.** To run the structural FreeSurfer processing for the file `T1_001.nii.gz` you should type on the terminal:  
 ```{bash}
-recon-all –i T1_001.nii.gz –s T1_001 –all
+recon-all -i T1_001.nii.gz -s T1_001 -all
 ```  
 > hint: type `recon-all` on the terminal and press `Enter key` to see more detailes about this command.  
 **c.** If you have more than one subject try a `for` loop over each T1 image.
 ```{bash}
 for subject in *.nii.gz; do
-	recon-all –i $subject –s ${subject/.nii.gz/} –all
+	recon-all -i $subject -s ${subject/.nii.gz/} -all
 done
 ```  
 **c.** If you have access to a SGE cluster you can use the next code instead of the latter.
 ```{bash}
 for subject in *.nii.gz; do
-	fsl_sub -l <path_to_logfiles> -R 6 recon-all –i $subject –s ${subject/.nii.gz/} –all
+	fsl_sub -l <path_to_logfiles> -R 6 recon-all -i $subject -s ${subject/.nii.gz/} -all
 done
 ```  
 **d.** When all processing is done you will have all the NIFTIS and the FreeSurfer outputs on the same directory, you might want to change the NIFTIS to somewhere else but is up to you.  
