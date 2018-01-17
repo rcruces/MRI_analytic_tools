@@ -1,10 +1,10 @@
 # Guideline for FreeSurfer Preprocessing  
 ## Table of Contents  
-1. [T1 Ordering & Quality Check](#step:-t1-ordering-&-quality-check)  
-1. [FreeSurfer Enviroment Configuration](#step-2:-freesurfer-enviroment-configuration)  
-1. [Finally Running FreeSurfer](#step-3:-finally-running-freesurfer)  
-1. [Quality Check of the FreeSurfer Output](#step-4:-quality-check-of-the-freesurfer-output)  
-1. [Time for Analysis](#step-5:-time-for-analysis)  
+1. [T1 Ordering & Quality Check](##step:-t1-ordering-&-quality-check)  
+1. [FreeSurfer Enviroment Configuration](##step-2:-freesurfer-enviroment-configuration)  
+1. [Finally Running FreeSurfer](##step-3:-finally-running-freesurfer)  
+1. [Quality Check of the FreeSurfer Output](##step-4:-quality-check-of-the-freesurfer-output)  
+1. [Time for Analysis](##step-5:-time-for-analysis)  
   
   
 ## Step 1: T1 Ordering & Quality Check  
