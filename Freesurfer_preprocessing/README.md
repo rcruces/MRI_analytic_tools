@@ -1,10 +1,10 @@
 # Guideline for FreeSurfer Preprocessing  
 ## Table of Contents  
-1. [T1 Ordering & Quality Check](#t1-ordering-&-quality-check)  
-1. [FreeSurfer Enviroment Configuration](#freeSurfer-enviroment-configuration)  
-1. [Finally Running FreeSurfer](#finally-running-freesurfer)  
-1. [Quality Check of the FreeSurfer Output](#quality-check-of-the-freesurfer-output)  
-1. [Time for Analysis](#time-for-analysis)  
+1. [T1 Ordering & Quality Check](#step:-t1-ordering-&-quality-check)  
+1. [FreeSurfer Enviroment Configuration](#step-2:-freesurfer-enviroment-configuration)  
+1. [Finally Running FreeSurfer](#step-3:-finally-running-freesurfer)  
+1. [Quality Check of the FreeSurfer Output](#step-4:-quality-check-of-the-freesurfer-output)  
+1. [Time for Analysis](#step-5:-time-for-analysis)  
   
   
 ## Step 1: T1 Ordering & Quality Check  
@@ -121,7 +121,7 @@ done
   
 > NOTE: For further information check the [FreeSurfer official webpage](http://surfer.nmr.mgh.harvard.edu/fswiki/RecommendedReconstruction)  
   
-## Step 4: Quality Check of the FreeSurfer Cutput  
+## Step 4: Quality Check of the FreeSurfer Output  
 ### 4.1 Directory outputs
 Once all the processing is done, first check the log files for errors. You can also list each output directory, they should contain the folowing directories:  
 > `./bem  ./label  ./mri  ./scripts  ./src  ./stats  ./surf  ./tmp  ./touch  ./trash`  
