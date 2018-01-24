@@ -36,9 +36,9 @@ After identifying the images with artifacts they must be excluded or repaired. I
 ## 1.4. T1 Denoise and Bias Field Correction (N4) 
    1. For a better output of the FreeSurfer algorithm it is highly recomended to perform *denoising* and *bias field correction* of each T1. This step will aid to increase the contrast between gray and white matter and reduce the signal to noise ratio, thus improving and facilitating the FS segmentation.  
    1. Figure with a sagital and axial view of a T1 with and without denoise and bias field correction.
-![T1 denoised](https://farm5.staticflickr.com/4761/24785957987_27c9f2c548_z.jpg)  
-   1. The script [`T1_denoiseN4`](https://github.com/rcruces/MRI_analytic_tools/blob/master/Freesurfer_preprocessing/T1_denoiseN4) can be use to asses this point, further information is detailled inside it. It uses minc-toolkit, FS and ANTs.  
-> You need to save the script `T1_denoiseN4` to your computer and [make it executable](https://askubuntu.com/questions/229589/how-to-make-a-file-e-g-a-sh-script-executable-so-it-can-be-run-from-termina#229592).  
+![T1_denoised](https://farm5.staticflickr.com/4761/24785957987_27c9f2c548_z.jpg)  
+   1. The script [`denoiseN4`](https://github.com/rcruces/MRI_analytic_tools/blob/master/Freesurfer_preprocessing/denoiseN4) can be use to asses this point, further information is detailled inside it. It uses minc-toolkit, FS and ANTs.  
+> You need to save the script `denoiseN4` to your computer and [make it executable](https://askubuntu.com/questions/229589/how-to-make-a-file-e-g-a-sh-script-executable-so-it-can-be-run-from-termina#229592).  
   
    3a. Create a new directory where all the processed T1 will be placed:
 ```{bash}
@@ -47,13 +47,13 @@ After identifying the images with artifacts they must be excluded or repaired. I
 
    3b. Run the denoise and N4 for each T1:  
 ```{bash}
-     T1_denoiseN4 T1_001.nii.gz <path>/T1_processed
+     denoiseN4 T1_001.nii.gz <path>/T1_processed
 ```  
 
    3c. You can do a `for` loop like in the next example:
 ```{bash}
      for subject in  <path>/T1_niftis/*; do
-          T1_denoiseN4 $subject <path>/T1_processed;
+          denoiseN4 $subject <path>/T1_processed;
      done
 ```  
   
