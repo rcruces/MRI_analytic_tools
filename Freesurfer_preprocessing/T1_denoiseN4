@@ -4,6 +4,9 @@ echo "
 Usage:
 
 	`basename $0` NIFTI ID output_directory
+		NIFTI:		Nifti file to apply the denoise
+		ID: 		Identification for the output file (NO extension)
+		Out directory: 	Path to output, could be here '.'
 
 This script aplies a non-local-means denoising using minc-toolkit and the N4 bias field correction from ANTs. 	
 NOTE: this script REQUIRES previous installation of FreeSurfer, minc-toolkit & ANTs.
@@ -27,15 +30,15 @@ fi
 # 		Starting Requirements & Warnings
 # --------------------------------------------------------------- # 
 NII=$1
-id=$2
+id=${2/.nii.gz/}
 outdir=$3
 
 echo -e "\033[48;5;22m\n[INIT]\t\tDenoise & Bias Field Correction of file $NII\n\033[0m"
 
 #---------------- Declaring variables ----------------#
 tmp=/tmp/dnsN4_$RANDOM
-out=${tmp}/${id}_dn4.nii.gz
-outfile=$outdir/${id}_dn4.nii.gz
+out=${tmp}/${id}.nii.gz
+outfile=${outdir}/${id}.nii.gz
 mnc=${tmp}/${id}_mnc.mnc
 mncdn=${tmp}/${id}_mnc_nlm.mnc
 
