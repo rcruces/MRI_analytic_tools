@@ -94,7 +94,7 @@ This one is described on the FreeSurfer webpage. if you are using a C-shell (csh
   
   
 # Step 3  Finally Running FreeSurfer  
-## 3.1. Running `recon_all`
+## 3.1. Running `recon-all`
 `recon-all` is the fully automated command from FreeSurfer for structural processing. It takes a while for each subject (from few to 10 hours or more depending on your computer), so it's highly recommended to use a job control system such as SGE (fsl_sub).   
 **a.** Change your directory to $SUBJECTS_DIR  
 ```{bash}
