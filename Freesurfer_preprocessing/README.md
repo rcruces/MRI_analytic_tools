@@ -39,9 +39,10 @@ After identifying the images with artifacts they must be excluded or repaired. I
 ![T1_denoised](https://farm5.staticflickr.com/4761/24785957987_27c9f2c548_z.jpg)  
    1. The script [`denoiseN4`](https://github.com/rcruces/MRI_analytic_tools/blob/master/Freesurfer_preprocessing/denoiseN4) can be use to asses this point, further information is detailled inside it. It uses minc-toolkit, FS and ANTs.  
 > You need to save the script `denoiseN4` to your computer and [make it executable](https://askubuntu.com/questions/229589/how-to-make-a-file-e-g-a-sh-script-executable-so-it-can-be-run-from-termina#229592).  
-> References for denoiseN4:  
-> Tustison, N. J., Avants, B. B., Cook, P. A., Zheng, Y., Egan, A., Yushkevich, P. A., & Gee, J. C. (2010). N4ITK: improved N3 bias correction. IEEE transactions on medical imaging, 29(6), 1310-1320.  
-> P. Coupé, P. Yger, S. Prima, P. Hellier, C. Kervrann, C. Barillot. An Optimized Blockwise NonLocal Means Denoising Filter for 3-D Magnetic Resonance Images. IEEE Transactions on Medical Imaging, 27(4):425–441, 2008. [MRI denoising by Pierrick Coupé](https://sites.google.com/site/pierrickcoupe/softwares/denoising-for-medical-imaging/mri-denoising).  
+>  
+> **References for denoiseN4:**  
+> - Tustison, N. J., Avants, B. B., Cook, P. A., Zheng, Y., Egan, A., Yushkevich, P. A., & Gee, J. C. (2010). N4ITK: improved N3 bias correction. IEEE transactions on medical imaging, 29(6), 1310-1320.  
+> - P. Coupé, P. Yger, S. Prima, P. Hellier, C. Kervrann, C. Barillot. An Optimized Blockwise NonLocal Means Denoising Filter for 3-D Magnetic Resonance Images. IEEE Transactions on Medical Imaging, 27(4):425–441, 2008. [MRI denoising by Pierrick Coupé](https://sites.google.com/site/pierrickcoupe/softwares/denoising-for-medical-imaging/mri-denoising).  
   
    3a. Create a new directory where all the processed T1 will be placed:
 ```{bash}
