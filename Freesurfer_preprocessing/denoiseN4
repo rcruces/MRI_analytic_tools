@@ -11,6 +11,11 @@ Usage:
 This script aplies a non-local-means denoising using minc-toolkit and the N4 bias field correction from ANTs. 	
 NOTE: this script REQUIRES previous installation of FreeSurfer, minc-toolkit & ANTs.
 
+If you use this script please remember to reference the developers:
+Tustison, N. J., Avants, B. B., Cook, P. A., Zheng, Y., Egan, A., Yushkevich, P. A., & Gee, J. C. (2010). N4ITK: improved N3 bias correction. IEEE transactions on medical imaging, 29(6), 1310-1320.  
+P. Coupé, P. Yger, S. Prima, P. Hellier, C. Kervrann, C. Barillot. An Optimized Blockwise NonLocal Means Denoising Filter for 3-D Magnetic Resonance Images. IEEE Transactions on Medical Imaging, 27(4):425–441, 2008.
+
+
 Raul RC
 INB, January, 2018
 raulrcruces@inb.unam.mx
@@ -34,6 +39,10 @@ id=${2/.nii.gz/}
 outdir=$3
 
 echo -e "\033[48;5;22m\n[INIT]\t\tDenoise & Bias Field Correction of file $NII\n\033[0m"
+echo -e "If you use this script please remember to reference the developers:
+Tustison, N. J., Avants, B. B., Cook, P. A., Zheng, Y., Egan, A., Yushkevich, P. A., & Gee, J. C. (2010). N4ITK: improved N3 bias correction. IEEE transactions on medical imaging, 29(6), 1310-1320.  
+P. Coupé, P. Yger, S. Prima, P. Hellier, C. Kervrann, C. Barillot. An Optimized Blockwise NonLocal Means Denoising Filter for 3-D Magnetic Resonance Images. IEEE Transactions on Medical Imaging, 27(4):425–441, 2008.
+"
 
 #---------------- Declaring variables ----------------#
 tmp=/tmp/dnsN4_$RANDOM
