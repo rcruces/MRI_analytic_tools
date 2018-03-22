@@ -8,6 +8,7 @@ Also check my code for some nice [R plots](https://github.com/rcruces/R-graph).
 1. [Vector Correction for DWI data](#vector-correction-for-dwi-data)
 1. [Freesurfer pre-processing](#freesurfer-preprocessing)
 1. [Connectome Prediction Modeling CPM](#connectome-prediction-modeling-cpm)
+1. [rois_volume.R](#`rois_volume.R`)
   
 # [Vector Correction for DWI data](https://github.com/rcruces/MRI_analytic_tools/tree/master/vector_corr) 
 **`vector_corr`** is a handy script to undestand the steps for correcting the diffusion vectors (bvecs) when the adquisition matrix is angled.    
@@ -26,3 +27,6 @@ The original code in matlab can be found in this [link](https://www.nitrc.org/fr
 I used this method with real structural data and a behavioral variable without succes, so included an ideal example of how this method would work if you have a strong linear relations between the connectomes *W<sub>ij</sub>* and a cognitive feature.  
 - All data an a matlab script for validation of the R implementation can be found here: [/R_connectome_prediction_modelling](https://github.com/rcruces/MRI_analytic_tools/tree/master/R_connectome_prediction_modelling)   
 > Reference: *SHEN, Xilin, et al. Using connectome-based predictive modeling to predict individual behavior from brain connectivity. nature protocols, 2017, vol. 12, no 3, p. 506-518.*.  
+  
+# [`rois_volume.R`](https://github.com/rcruces/MRI_analytic_tools/blob/master/rois_volume.R)  
+R script with a function that counts the number of voxels per ROI of a NIFTI file. For example a segmentation. It uses the R package [`oro.nifti`](https://www.rdocumentation.org/packages/oro.nifti/versions/0.7.2).
