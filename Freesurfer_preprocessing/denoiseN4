@@ -15,8 +15,8 @@ If you use this script please remember to reference the developers:
 Tustison, N. J., Avants, B. B., Cook, P. A., Zheng, Y., Egan, A., Yushkevich, P. A., & Gee, J. C. (2010). N4ITK: improved N3 bias correction. IEEE transactions on medical imaging, 29(6), 1310-1320.  
 P. Coupé, P. Yger, S. Prima, P. Hellier, C. Kervrann, C. Barillot. An Optimized Blockwise NonLocal Means Denoising Filter for 3-D Magnetic Resonance Images. IEEE Transactions on Medical Imaging, 27(4):425–441, 2008.
 
-BUG: in one subject the transform matrix of the denoised NIFTI changed from the original it was fixed with this:
-flirt -usesqform -forcescaling -applyisoxfm 1,1,1 -v -in t1_dn4.nii.gz -ref t1_original.nii.gz -out t1_dn4.nii.gz
+BUG: in one subject the transform matrix of the denoised NIFTI changed from the original it was fixed copying the header from the original to the denoised this:
+fslcpgeom T1.nii.gz T1_nd4.nii.gz
 
 Raul RC
 INB, January, 2018
