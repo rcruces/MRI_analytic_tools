@@ -1,0 +1,206 @@
+#!/bin/bash
+
+
+#------------------------------------------------------------------------------#
+# 			FUNCTIONS
+help() {
+echo " 
+Corrige los vectores de difusión asociados a la direccion (bvecs) en caso de que la adquisición tenga una rotación (si fue procesado con PAR/REC de Philips Achieva TX 3).
+Y en caso de que sean más de dos DWI las concatena en un solo arhivo.
+
+FALTA LA CONDICION PARA CUANDO SOLO HAY UN DWI linea 114 y 162
+
+Realizará los siguientes pasos:
+	1.Obtener la matriz de rotación. 
+	  Para los archivos PAR/REC es el archivo '.omat' que se obtienes tras usar PARconv_v1.12.sh
+	  omat es un archivo de texto que representa una matriz de 4x4 
+	2.Rotar los vectores. 
+	  Multiplicación de los vectores bvecs por la matriz omat
+	3. Concatena  en el orden dado
+	3.Invertir Y y Z de los bvecs. 
+	  Multiplica por -1 la coordenada Y & Z de los bvecs.
+
+Ejemplo:
+	`basename $0` -in \"DWI_01.nii.gz DWI_02.nii.gz\" -out DWI_outname.nii.gz
+
+		      -in DWIs para corregir y concatenar
+		      -out Nombre de salida 
+
+Raul RC
+INB, Febrero 2018
+raulrcruces@inb.unam.mx
+"
+}
+#---------------- FUNCTION: Erase EMPTY ROWS ----------------#
+empty_row() {
+Txt=$1
+c=`grep -c "^\s*$" $Txt`
+if ((c > 0)); 
+then
+	echo  -e "\033[38;5;83m\n[INFO]... Borrando filas en blanco de $Txt \033[0m"
+	sed -i '/^\s*$/d' $Txt
+fi
+}
+
+#---------------- FUNCTION: PRINT COLOR COMMAND ----------------#
+cmd() {
+text=$1
+echo -e "\033[38;5;208mcommand--> $text \033[0m"
+echo $($text)
+}
+
+Info() {
+Col="38;5;83m" # Color code 
+echo  -e "\033[$Col\n[INFO]..$1 \033[0m"
+}
+
+Error() {
+echo -e "\e[0;31m\n[ERROR]..... $1\n\e[0m"
+}
+
+#------------------------------------------------------------------------------#
+# 			WARNINGS
+# Number of inputs
+if [ $# -lt 4 ]; then Error "Some arguments are missing"; help; exit 0; fi
+if [ $# -gt 4 ]; then Error "Too may arguments, please quote between DWIs:\n\t\t\"dwi01.nii.gz dwi02.nii.gz dwi03.nii.gz\""; help; exit 0; fi
+
+
+
+#------------------------------------------------------------------------------#
+# 			ARGUMENTS
+echo -e "\033[48;5;58m\n[INIT]..... \tDWI Vector Correction for Philips Achieva TX\n\033[0m"
+for arg in "$@"
+do
+  case "$arg" in
+  -h|-help)
+    help
+    exit 1
+  ;;
+  -out)
+   out=`echo $2 | awk -F "." '{print $1}'` 
+   Info "Output ID:\t\033[0m\033[38;5;81m$out\033[0m"
+   shift;shift
+  ;;
+  -in)
+   in=$2
+   Info "Inputs are:\t\033[0m\033[38;5;81m$in\033[0m"
+   arr=($in)
+   shift;shift
+  ;;
+   esac
+done
+if [ -f $out.nii.gz ] ; then Error "Output file already exist: $out.nii.gz"; exit 0; fi
+
+
+#------------------------------------------------------------------------------#
+# 			VARIABLES
+dwis=""
+tmp=/tmp/vectorCorr_$RANDOM
+
+# Temporal directory
+Info "Temporal directory"
+cmd "mkdir $tmp"
+
+# Checks the existence of the volume
+Info "Checking volumes existence:"
+for var in ${arr[@]}; do
+	if [ ! -f $var ]; then Error "$var was not found, skiping"; id=""; else
+	echo -e "\033[38;5;81m\t\t $var was found \033[0m"; id=`echo $var | awk -F "." '{print $1}'` 
+	dwis="$dwis $id"	
+	fi
+done
+# Array of variables
+dwis=($dwis)
+Ndwi=${#dwis[@]}
+if [ "${Ndwi}" -lt 1 ]; then 
+	Error "Not enough inputs to work, please check the names of your DWIs"; rm-Rf $tmp; exit 0; else
+	Info "We have ${#dwis[@]} DWIs to work:"
+	echo -e "\t\t\033[38;5;81m ${dwis[@]} \033[0m" 
+
+fi
+
+
+
+#------------------------------------------------------------------------------#
+# 			EMPTY ROWS in VECTORS FILES
+N=0
+Info "Checking vectors files existence"
+for nii in ${dwis[@]}; do
+	for vec in bval bvec; do 
+	if ls $nii*$vec* 1> /dev/null 2>&1; then
+	    dwi=`ls $nii*$vec*`; echo -e "\033[38;5;81m\t\t $dwi was found \033[0m";
+	    empty_row $dwi 
+	else
+	    Error "$nii does not has BVECS here"; N=1;
+	fi
+	done
+done
+if [ "${N}" == 1 ]; then Error "A VECTOR file is missing"; exit 0; fi
+
+
+
+#------------------------------------------------------------------------------#
+# 			Orientation and Number of vectors
+Info "Checking bvecs orientarion and number of directions"
+bvals=""
+bvecs=""
+DWIs=""
+for nii in ${dwis[@]}; do
+	for vec in bvec; do bve=`ls $nii*$vec*`; bva=`ls $nii*bval*`;
+# Count the number of columns of bvecs
+	Ncol=`awk '{print NF}' ${bve} | sort -nu | tail -n 1`
+	if [ "$Ncol" != 3 ]; then echo -e "\033[38;5;81m\t\t $bve has $Ncol columns, it will be transpose \033[0m"; transpose $bve; transpose $bva; fi
+# Count the number of columns of bvecs
+	Nrow=`cat ${bve} | wc -l`
+	if [ "$Nrow" -lt 6 ]; then Error "${nii} does not have enought directions, please remove it"; exit 0; else 
+	echo -e "\033[38;5;81m\t\t ${bve} has $Nrow directions \033[0m"; bvals="$bvals $bva"; bvecs="$bvecs $bve"; DWIs="$DWIs $nii.nii.gz" ;fi
+	done
+done
+
+
+#------------------------------------------------------------------------------#
+# 			Concatenate DWIs
+if [ "${Ndwi}" -gt 2 ]; then Info "Concatenation of DWIs"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -axis 3 $DWIs $out.nii.gz"
+else
+Info "Input DWIs is the same as the output"
+cmd "cp $DWIs $out.nii.gz"
+fi
+
+#------------------------------------------------------------------------------#
+# 			Concatenate vectors & Inverted for philips
+Bvec="$out.bvecs"
+Bval="$out.bvals"
+Info "Concatenation of bvals"
+echo -e "\033[38;5;81m\t\t bvals = $bvals\033[0m"
+cat $bvals > $Bval
+
+Info "Concatenation of bvecs and Philips Achieva Tx 3.0T correction (Y,Z*-1)"
+echo -e "\033[38;5;81m\t\tbvecs = $bvecs\033[0m"
+cat $bvecs | awk '{print $1,-$2,-$3}' > $Bvec
+
+
+#------------------------------------------------------------------------------#
+# 			Rotate bvecs if omat exist
+if [ -d omat ]; then Info " Rotating bvecs according to the adquisition matrix: ${dwis[0]}_to0.omat"; 
+echo -e "\033[38;5;81m\t\tI assume that all omats are the same please CHECK\033[0m";
+	trans=omat/${dwis[0]}_to0.omat
+	rot=${tmp}/bvecs_rotated.txt
+	cmd "xfmrot $trans $Bvec $rot"
+	cmd "mv $rot $Bvec"
+else
+Info "No other rotations are needed for the bvecs"
+fi
+
+
+#------------------------------------------------------------------------------#
+# 			Removes Temoral Files
+Info "Deleting temporal files"
+cmd "rm -R $tmp"
+
+#------------------------------------------------------------------------------#
+# 			Number of BVECS and DWI volumes
+Nvec=`cat $Bvec | wc -l`
+Ndir=`/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -size $out.nii.gz | awk -F " " '{print $4}'`
+if [ "$Ndir" != "$Nvec" ]; then echo -e "\e[0;31m\n[WARNING]..... Missmatch between NUMBER of Volumes ($Ndir) and bvecs ($Nvec)\n\t\tTRY removing MEAN-DWI volumes\n\e[0m"; exit 0; else Info "Number of bvecs: $Nvec.  Number of DWI volumes: $Ndir"; fi
+
