@@ -1,0 +1,109 @@
+#!/bin/bash
+#
+# Raúl RC
+# Febrero 2018
+# raulrcruces@inb.unam.mx
+#
+
+#------------------------------------------------------------------------------#
+# 			FUNCTIONS
+help() {
+echo " 
+Extrae la B0 de la adquisición DWI Postero-Anterior, para generar el fieldmap.
+
+Ejemplo:
+	`basename $0` INPUT OUTPUT
+
+		      INPUT   DWI de entrada
+		      OUTPUT  Nombre de salida 
+
+Raul RC
+INB, Febrero 2018
+raulrcruces@inb.unam.mx
+"
+}
+
+#---------------- FUNCTION: PRINT COLOR COMMAND ----------------#
+cmd() {
+text=$1
+echo -e "\033[38;5;208mCOMMAND --> $text \033[0m"
+echo $($text)
+}
+
+Info() {
+Col="38;5;83m" # Color code 
+echo  -e "\033[$Col\n[INFO]..... $1 \033[0m"
+}
+
+Error() {
+echo -e "\e[0;31m\n[ERROR]..... $1\n\e[0m"
+}
+
+#------------------------------------------------------------------------------#
+# 			WARNINGS
+# Number of inputs
+if [ $# -lt 2 ]
+then
+	echo -e "\e[0;31m\n[ERROR]... \tAn argument is missing\n\e[0m \t\tDWI IN: \033[38;5;5m$1\033[0m\n\t\tOut name: \033[38;5;5m$2\033[0m\n"
+	help
+	exit 0
+fi
+if [ -f $2 ]; then Error "Output file already exist: $2"; exit 0; fi
+if [ ! -f $1 ]; then Error "DWI does not exist: $1"; exit 0; fi
+
+
+#------------------------------------------------------------------------------#
+# 			RUN
+echo -e "\033[48;5;58m\n[INIT]..... \tGet the B0 from the PA-DWI with N4 Bias field: $1\n\033[0m"
+
+#------------------------------------------------------------------------------#
+# 			VARIABLES
+dwi=$1
+out=`echo $2 | awk -F "." '{print $1}'`
+id=`echo $dwi | awk -F "." '{print $1}'` 
+tmp=/tmp/dwiPA_$RANDOM
+grad=${tmp}/vectors.b
+b0=${tmp}/${id}_b0.nii.gz
+n4=${tmp}/${id}_n4.nii.gz
+
+Info "Checking vectors files existence"
+for vec in bval bvec; do 
+   if ls $id*$vec* 1> /dev/null 2>&1; then
+	    test=`ls $id*$vec*`; echo -e "\033[38;5;81m\t\t $test was found \033[0m";
+   else
+	    Error "$id does not has a $vec file in this directory"; exit 0;
+fi
+done
+
+
+bval=`ls $id*bval*`
+bvec=`ls $id*bvec*`
+
+
+# Temporal directory
+Info "Temporal directory"
+cmd "mkdir $tmp"
+
+
+
+#------------------------------------------------------------------------------#
+# 			Do stuff
+Info "Info Getting gradient table "
+paste $bvec $bval > $grad
+cat $grad
+
+Info "Bias Field Correction of $dwi "
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/../scripts/dwibiascorrect -grad $grad -ants -force $dwi $n4"
+
+Info "Getting the B0 from $dwi"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/dwiextract -bzero -grad $grad $n4 $out.nii.gz"
+
+#------------------------------------------------------------------------------#
+# 			Removes Temoral Files
+Info "Deleting temporal files"
+cmd "rm -R $tmp"
+
+
+#------------------------------------------------------------------------------#
+# 			End
+Info "Outfile: ${out}.nii.gz\n"

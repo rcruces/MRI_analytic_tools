@@ -1,0 +1,325 @@
+#!/bin/bash
+
+# Raúl RC
+# Febrero 2018
+# raulrcruces@inb.unam.mx
+#
+# NOTA: funciona con FSL la última versión de mrtrix. Sin embargo para no tener problemas entre computadoras lugar de cargar la fuente de mrtrix llamo a la función directamente
+#
+# WARNING cuando X y Y son impares
+# WARNING revisar que el stride sea igual para todos -1,2,3,4
+# ERROR en caso de que falle la mascara  binaria de TOPUP
+# add_slice FUNCTION: Falta Corregir bien el problema de cuando se pega una rebana
+# Incluir el TOPUP para 2 o más b0s en lugar de la media, movimiento entre shells
+# EDDY con fsl 5.11 para corregir las bandas negras en sagital???
+
+
+#------------------------------------------------------------------------------#
+# 			FUNCTIONS
+help() {
+echo -e " 
+
+Ejemplo:
+
+\033[38;5;141m`basename $0`\033[0m  \033[38;5;197m-dwi2fix\033[0m DWI.nii.gz \033[38;5;197m-dwiPA\033[0m DWI_PA.nii.gz \033[38;5;197m-out\033[0m DWI_fixed \033[38;5;197m-bvecs\033[0m DWI.bvecs \033[38;5;197m-bvals\033[0m DWI.bvals
+
+  \033[38;5;197m-dwi2fix\033[0m 	DWI para corregir
+  \033[38;5;197m-dwiPA\033[0m 	b0-DWI con adquisición contraria a las imagenes por corregir.
+  \033[38;5;197m-bvecs\033[0m 	Archivo con la dirección de los vectores de la dwi2fix en formato columna (Nx3)
+  \033[38;5;197m-bvals\033[0m 	Archivo con la magnitud de los vectores de la dwi2fix en formato columna (Nx1)
+  \033[38;5;197m-out\033[0m 		Identificador para los archivos de salida
+
+
+USO: Corrige las inhomogeneidades geométricas y de movimiento de las DWI con adquisicion AP y un volumen B0-PA. Utiliza las herramientas de FSL TOPUP y EDDY.
+
+NOTA: Los bvecs y bvals de la DWI deben de estar dentro del mismo directorio que la DWI, con un identificador común. 
+NOTA2: Si se han seguido los pasos anterior los vectores deben estar ahora en formato columna!!!
+Este script SOLO CORRE dentro del directorio donde esten los archivos DWI.
+
+Raul RC
+INB, Febrero 2018
+raulrcruces@inb.unam.mx
+"
+}
+
+#  FUNCTION: PRINT COLOR COMMAND
+cmd() {
+text=$1
+echo -e "\033[38;5;208mCOMMAND -->\033[0m \033[38;5;39m$text\033[0m"
+eval $text
+}
+#  FUNCTION: PRINT INFO
+Info() {
+Col="38;5;129m" # Color code 
+echo  -e "\033[$Col\n[INFO]..... $1 \033[0m"
+}
+#  FUNCTION: PRINT ERROR
+Error() {
+echo -e "\e[0;31m\n[ERROR]..... $1\n\e[0m"
+}
+#  FUNCTION: PRINT CHECK
+Check() {
+echo -e "\033[38;5;121m\t\t $1 \033[0m"
+}
+
+
+#------------------------------------------------------------------------------#
+#			ARGUMENTS
+# Number of inputs
+if [ "$#" -lt 10 ]; then Error "One or more arguments are missing:"; fi
+if [ "$#" -gt 10 ]; then Error "Too may arguments"; help; exit 0; fi
+
+# Create VARIABLES
+for arg in "$@"
+do
+  case "$arg" in
+  -h|-help)
+    help
+    exit 1
+  ;;
+  -dwi2fix)
+   dwi=$2 
+   shift;shift
+  ;;
+  -dwiPA)
+   PA=$2 
+   shift;shift
+  ;;
+  -bvecs)
+   bvec=$2 
+   shift;shift
+  ;;
+  -bvals)
+   bval=$2 
+   shift;shift
+  ;;
+  -out)
+   out=$2
+   shift;shift
+  ;;
+   esac
+done
+
+#------------------------------------------------------------------------------#
+# 			WARNINGS
+# Enough arguments?
+Note(){
+echo -e "\t\t$1\t\033[38;5;197m$2\033[0m"
+}
+arg=($dwi $PA $bvec $bval $out)
+if [ "${#arg[@]}" -lt 5 ]; then 
+Note "-dwi2fix " $dwi
+Note "-dwiPA " "\t$PA"
+Note "-bvecs " "\t$bvec"
+Note "-bvals " "\t$bval"
+Note "-out " "\t$out"; echo ""; help; exit 0; fi
+
+
+#------------------------------------------------------------------------------#
+# 			RUN
+aloita=$(date +%s.%N)
+echo -e "\033[48;5;57m\n[INIT]..... Corrige inhomogeneidades y movimiento de $dwi con la adquisición inversa $PA \n\033[0m"
+
+# Set FSL 5
+source /home/inb/lconcha/fmrilab_software/tools/setup_fsl5
+FSLDIR=/home/inb/lconcha/fmrilab_software/fsl_5.0.9
+
+
+#------------------------------------------------------------------------------#
+# 		CHECKING PARAMETERS
+# Do all files exist?
+if [ ! -f $dwi ]; then Error "DWI to fix does not exist: $dwi"; exit 0; fi
+if [ ! -f $PA ]; then Error "DWI-PA B0 does not exist: $PA"; exit 0; fi
+if [ ! -f $bvec ]; then Error "BVEC file $bvec does not exist!"; exit 0; fi
+if [ ! -f $bval ]; then Error "BVAL file $bval does not exist!"; exit 0; fi
+if [ -f "${out}.nii.gz" ]; then Error "Output file already exist: $out"; exit 0; fi
+
+# Are DWI in nifti format nii.gz?
+is_niigz(){
+ng=`echo $1 | awk -F "." '{$1="";print $0}'`
+if [ "$ng" == " nii gz" ]; then Note "Correct format" $1; else Error "$1 must be a compressed nifti, with extension 'nii.gz'"; exit 0; fi
+}
+is_niigz $dwi
+is_niigz $PA
+
+Info "Are BVALS and BVECS in correct format?"
+rowsBval=`cat $bval | wc -l`
+rowsBvec=`cat $bvec | wc -l`
+if [ "$rowsBval" == "$rowsBvec" ]; then Check " YES, the Number of rows in $bval and $bvec are the same: $rowsBval"; else Error "Number of rows in $bval and $bvec are DIFFERENT"; exit 1; fi
+if [ $rowsBval == 3 ]; then Error "Bvals and Bvecs seem to be in FSL format, they must be in COLUMN Nx3 !!"; exit 0; fi
+
+Info "Are the same number of volumes and vectors"
+vol=`fslval $dwi dim4`
+if [ "$vol " -eq "$rowsBval" ]; then Check "YES, the number of rows in $bval and number of volumes in $dwi are the same: $rowsBval"; else Error "Missmatch between BVECS/BVALS and VOLUMES in $dwi "; exit 1; fi
+
+# Checks the FOV compatibility
+size1=`/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -size $dwi | awk -F " " '{print $1, $2, $3}'`
+size2=`/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -size $PA | awk -F " " '{print $1, $2, $3}'`
+if [ "$size1" == "$size2" ]; then Info "Dimensions for $dwi and $PA are the same:"; Check "$size1"; else Error "Input dimensions are different: $size1 vs $size2"; exit 1; fi
+
+# Checks the VOXELS resolution
+size1=`/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -vox $dwi | awk -F " " '{print $1, $2, $3}'`
+size2=`/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -vox $PA | awk -F " " '{print $1, $2, $3}'`
+if [ "$size1" == "$size2" ]; then Info "Voxel resolution for $dwi and $PA are the same:"; Check "$size1"; else Error "Input voxel resolution are different: $size1 vs $size2"; exit 1; fi
+
+
+#------------------------------------------------------------------------------#
+# 			Temporal directory & Variables 
+id=`echo $dwi | awk -F "." '{print $1}'` 
+tmp=/tmp/dwiCORR_${RANDOM}
+grad=${tmp}/${id}_vectors.b
+bvalFSL=${tmp}/${id}_bval.txt
+bvecFSL=${tmp}/${id}_bvec.txt
+mif=${tmp}/${id}_dwi.mif
+b0s=${tmp}/${id}_b0s.nii.gz
+b0m=${tmp}/b0_mean.nii.gz
+b0=${tmp}/b0s_topup.nii.gz
+
+Info "Temporal directory"
+cmd "mkdir $tmp"
+
+
+#------------------------------------------------------------------------------#
+#		Re-Slices The DWIps to a Even number for topup
+# ADD an EMPTY slice at the bottom of Z-axis
+slices=`fslval $dwi dim3`
+rem=$(( $slices % 2 ))
+if [ $rem -eq 0 ]; then Info "Z-dimension is even number ($slices) it will work with TOPUP";
+else Info "Z-dimension is odd number ($slices), I will make it even adding a slide to the bottom!!."
+	Info "Getting an even z-dimension of: $dwi"
+	slice=${tmp}/slice.nii.gz
+	dwi_slice=${tmp}/${id}_dwi_slice.nii.gz
+	/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcrop $dwi $slice -axis 2 1 1
+	fslmaths $slice -mul 0 $slice
+	cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -quiet -axis 2 $slice $dwi $dwi_slice"
+	dwi=$dwi_slice
+# Pasa un error muy extraño cuando trato de reecribir ${tmp}/slice.nii.gz para la DWI-PA????
+	Info "Getting an even z-dimension of: $PA"
+	PA_slice=${tmp}/${id}_PA_slice.nii.gz
+	cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -quiet -axis 2 $slice $PA $PA_slice"
+	cmd "rm -v $slice"	
+	PA=$PA_slice
+fi
+
+
+#------------------------------------------------------------------------------#
+# 	Obtiene vectores en formato de FSL y la B0 de la DWI a corregir
+Info "Getting gradient table in FSL format"
+paste $bvec $bval > $grad
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrconvert -quiet -grad $grad $dwi $mif"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -export_grad_fsl $bvecFSL $bvalFSL $mif"
+
+Info "Getting the b0s from the DWIs"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/dwiextract -bzero $mif $b0s"
+
+Info "Getting the mean of the DWI's b0s"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrmath -quiet -axis 3 $b0s mean $b0m"
+
+Info "Concatenation of the b0"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -quiet -axis 3 $PA $b0m $b0"
+
+
+#------------------------------------------------------------------------------#
+# 			TOPUP: Field map estimation
+# Si alguna dimension es impar TOPUP generara el siguiente error: Subsampling levels incompatible with image data
+# No es más conveniente estimar el Field map para la b0 de cada shell en lugar del promedio??
+Info " Adquisition parameters for TOPUP"
+acqParams=${tmp}/acqParams.txt
+echo 0 -1 0 0.047 > $acqParams
+echo 0 1 0 0.047 >> $acqParams
+cat $acqParams
+
+tdir=TOPUP
+mkdir $tdir
+warp=${tdir}/dwi_warped
+top=dwi_topup
+
+Info "Running TOPUP"
+cmd "topup -v --imain=$b0 --datain=$acqParams --config=b02b0.cnf --out=${tdir}/${top} --fout=${tdir}/dwi_topup_field --iout=$warp"
+
+
+#------------------------------------------------------------------------------#
+# 		Binary Mask from TOPUP DWI-warped
+Info "Creating a binary mask from TOPUP DWI-warped for EDDY"
+warpM=${tmp}/b0_warpmean.nii.gz
+mask=${tmp}/binary
+cmd "fslmaths $warp -Tmean $warpM"
+cmd "bet $warpM $mask -m -n -f 0.35"
+mask=${tmp}/binary_mask.nii.gz
+
+
+# Check size and voxel resolution; OPTION to continue MANUALLY from here!!!
+Info "Are the Binary mask & dwi of the same size?"
+dwiD=`/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -size $dwi | awk -F " " '{print $1, $2, $3}'`
+biD=`/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -size $mask | awk -F " " '{print $1, $2, $3}'`
+if [ "$dwiD" == "$biD" ]; then Check "YES, mask and DWI's dimensions are the same: $biD"; else Error "NO, dimensions differ: $dwiD vs $biD"; exit 0; fi
+
+Info "Do the Binary mask & dwi have the same voxels resolution?"
+dwiV=`mrinfo -quiet -vox $dwi | awk -F " " '{print $1, $2, $3}'`
+biV=`mrinfo -quiet -vox  $mask | awk -F " " '{print $1, $2, $3}'`
+if [ "$dwiV" == "$biV" ]; then Check "YES, dimensions are the same: $dwiV"; else Check "NO, Voxels dimensions are different and must be rescaled"; Check "DWI: $dwiV     MASK: $biV";
+	dwi2=${tmp}/dwi_crop_vox.nii.gz
+        cmd "flirt -usesqform -forcescaling -applyisoxfm 2,2,2 -v -in $dwi -ref $dwi -out $dwi2";
+	cmd "flirt -usesqform -forcescaling -applyisoxfm 2,2,2 -v -in $mask -ref $dwi -out $mask";
+	dwi=$dwi2
+fi
+
+
+#------------------------------------------------------------------------------#
+# 		EDDY: Movement and Geometric distortion Correction
+refIndex=2
+nT=`fslval $dwi dim4`
+txt_index=${tmp}/${top}_indices.txt
+indx=""
+for ((i=1; i<=$nT; i+=1)); do indx="$indx $refIndex"; done
+echo $indx > $txt_index
+
+Info "EDDY parameters"
+Check "Text Index: \033[0m\t$txt_index"
+Check "Vectors to Fix: \033[0m\t$bvalFSL & $bvecFSL"
+Check "Volume to correct: \033[0m\t$dwi"
+Check "AcqParams reference: \033[0m\t$refIndex"
+Check "Output directory: \033[0m\t$tdir"
+
+Info "Running EDDY"
+cmd "eddy --verbose --imain=$dwi --mask=$mask --acqp=$acqParams --index=$txt_index --bvecs=$bvecFSL --bvals=$bvalFSL --topup=${tdir}/${top} --out=$out"
+#--flm=linear
+
+if [ -f ${out}.nii.gz ]; then Info "Seems like TOPUP & EDDY ran correctly, I might correct the B-vectors here"; else
+Error "Something is wrong with eddy, please check the $tmp directory and the error"; exit 0; fi
+
+
+#------------------------------------------------------------------------------#
+# 			Vector correction MIF creating with vectors encoded
+Info "Rotando vectores con las transformaciones de edyy/topup"
+export bvec_Pos="${bvec}"
+export eddy="`pwd`/${out}.eddy_parameters"
+# NOTA: Aqui tienes que poner la via completa de donde esta el script ejecutable, debo de pensar en una mejor manera de hacerlo despues
+python /misc/ernst/rcruces/git_here/MRI_analytic_tools/vector_corr/rotateBvec.py
+Bmtrx=${out}.b
+idBvec=`echo $bvec | awk -F "." '{print $1}'` 
+paste *_rotated.bvec $bval > $Bmtrx
+rm -v *_rotated.bvec
+
+Info "Creating a mif file with the corrected vectors encoded within"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrconvert -grad $Bmtrx ${out}.nii.gz ${out}.mif"
+
+
+#------------------------------------------------------------------------------#
+# 			Removes Temoral Files
+Info "Deleting temporal files"
+cmd "rm -R $tmp"
+
+
+#------------------------------------------------------------------------------#
+# 			Termino del script
+Info "Outfile: "
+ls $out*
+
+# Ending time
+lopuu=$(date +%s.%N)
+eri=$(echo "$lopuu - $aloita" | bc)
+eri=`echo print $eri/60 | perl`
+echo -e "\033[38;5;220m\nTOTAL running time: ${eri} minutes \n\033[0m"
+
+
