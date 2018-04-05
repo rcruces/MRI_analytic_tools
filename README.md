@@ -5,10 +5,14 @@ Also check my code for some nice [R plots](https://github.com/rcruces/R-graph).
 ![intro](https://farm5.staticflickr.com/4709/38930332034_2d9b7a79aa_o.png)  
   
 ## Table of Contents  
+1. [DWI pre-Processing](#dwi-pre-processing)
 1. [Vector Correction for DWI data](#vector-correction-for-dwi-data)
 1. [Freesurfer pre-processing](#freesurfer-preprocessing)
 1. [Connectome Prediction Modeling CPM](#connectome-prediction-modeling-cpm)
 1. [rois_volume.R](#`rois_volume.R`)
+
+# [DWI pre-Processing](https://github.com/rcruces/MRI_analytic_tools/tree/master/DWI_preprocessing)  
+Pipeline for preprocessing Diffusion Weighted Images (DWI). I makes vector correction, denoise, bias field correction, motion and geometric distorion correction. It uses multiple tools such as: ants, fsl, mrtrix...  
   
 # [Vector Correction for DWI data](https://github.com/rcruces/MRI_analytic_tools/tree/master/vector_corr) 
 **`vector_corr`** is a handy script to undestand the steps for correcting the diffusion vectors (bvecs) when the adquisition matrix is angled.    
