@@ -1,5 +1,5 @@
 # Contenido: Procesamiento Imágenes Pesadas a Difusión  
-1. [`dwi_vec`]() Paso Inicial, concatena las DWIs y arregla los vectores (Philips). **NOTA: fata agregar la opcion para cuando es un solo volumen DWI**
+1. [`dwi_vec`]() Paso Inicial, concatena las DWIs y arregla los vectores (Philips) para uno o ms shells. 
 1. [`dwi_dn4`](https://github.com/rcruces/epilepsia_processing/blob/master/code/dwi_dn4) Paso 1 de 2 para el pre procesamiento de imágenes pesadas a difusión, denoise y bias field correction con dos opciones LPCA y mrtrix.  
 1. [`dwi_corr`](https://github.com/rcruces/epilepsia_processing/blob/master/code/dwi_corr) Paso final del procesamiento de DWI. Incluye corrección geométricas y de movimiento (EDDY y TOPUP). Finalmente corrige los vectores de acuerdo a los `eddy_parameters` y crea un archivo `mif` corregido y con vectores codificados dentro de él.
   
