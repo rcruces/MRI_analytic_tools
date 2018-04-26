@@ -10,7 +10,7 @@
 # WARNING revisar que el stride sea igual para todos -1,2,3,4
 # ERROR en caso de que falle la mascara  binaria de TOPUP
 # add_slice FUNCTION: Falta Corregir bien el problema de cuando se pega una rebana
-# Incluir el TOPUP para 2 o más b0s en lugar de la media, movimiento entre shells
+# Incluir el TOPUPy EDDY para 2 o más b0s en lugar de la media, movimiento entre shells
 # EDDY con fsl 5.11 para corregir las bandas negras en sagital???
 
 
@@ -28,6 +28,8 @@ Ejemplo:
   \033[38;5;197m-bvecs\033[0m 	Archivo con la dirección de los vectores de la dwi2fix en formato columna (Nx3)
   \033[38;5;197m-bvals\033[0m 	Archivo con la magnitud de los vectores de la dwi2fix en formato columna (Nx1)
   \033[38;5;197m-out\033[0m 		Identificador para los archivos de salida
+  \033[38;5;197m-index\033[0m 	Archivo opcional de txt con la referencia de la b0 para corregir si son más de una.
+				Si no se provee se calcula la media de las b0s para TOPUP y Eddy
 
 
 USO: Corrige las inhomogeneidades geométricas y de movimiento de las DWI con adquisicion AP y un volumen B0-PA. Utiliza las herramientas de FSL TOPUP y EDDY.
@@ -67,7 +69,7 @@ echo -e "\033[38;5;121m\t\t $1 \033[0m"
 #			ARGUMENTS
 # Number of inputs
 if [ "$#" -lt 10 ]; then Error "One or more arguments are missing:"; fi
-if [ "$#" -gt 10 ]; then Error "Too may arguments"; help; exit 0; fi
+if [ "$#" -gt 12 ]; then Error "Too may arguments"; help; exit 0; fi
 
 # Create VARIABLES
 for arg in "$@"
@@ -95,6 +97,10 @@ do
   ;;
   -out)
    out=$2
+   shift;shift
+  ;;
+  -index)
+   index=$2
    shift;shift
   ;;
    esac
@@ -134,7 +140,9 @@ if [ ! -f $bvec ]; then Error "BVEC file $bvec does not exist!"; exit 0; fi
 if [ ! -f $bval ]; then Error "BVAL file $bval does not exist!"; exit 0; fi
 if [ -f "${out}.nii.gz" ]; then Error "Output file already exist: $out"; exit 0; fi
 
+
 # Are DWI in nifti format nii.gz?
+Info "Checking the NIFTIs"
 is_niigz(){
 ng=`echo $1 | awk -F "." '{$1="";print $0}'`
 if [ "$ng" == " nii gz" ]; then Note "Correct format" $1; else Error "$1 must be a compressed nifti, with extension 'nii.gz'"; exit 0; fi
@@ -147,6 +155,10 @@ rowsBval=`cat $bval | wc -l`
 rowsBvec=`cat $bvec | wc -l`
 if [ "$rowsBval" == "$rowsBvec" ]; then Check " YES, the Number of rows in $bval and $bvec are the same: $rowsBval"; else Error "Number of rows in $bval and $bvec are DIFFERENT"; exit 1; fi
 if [ $rowsBval == 3 ]; then Error "Bvals and Bvecs seem to be in FSL format, they must be in COLUMN Nx3 !!"; exit 0; fi
+
+Info "Index file: $index"
+if [ ! -f "${index}" ]; then Check "TOPUP will be estimated with the MEAN of all b0s"; else Info "TOPUP will be estimated for each b0 provided"; fi
+
 
 Info "Are the same number of volumes and vectors"
 vol=`fslval $dwi dim4`
@@ -212,21 +224,41 @@ cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrinfo -export_g
 Info "Getting the b0s from the DWIs"
 cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/dwiextract -bzero $mif $b0s"
 
-Info "Getting the mean of the DWI's b0s"
-cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrmath -quiet -axis 3 $b0s mean $b0m"
-
-Info "Concatenation of the b0"
-cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -quiet -axis 3 $PA $b0m $b0"
 
 
 #------------------------------------------------------------------------------#
 # 			TOPUP: Field map estimation
 # Si alguna dimension es impar TOPUP generara el siguiente error: Subsampling levels incompatible with image data
 # No es más conveniente estimar el Field map para la b0 de cada shell en lugar del promedio??
-Info " Adquisition parameters for TOPUP"
+Info " ADQUISITION PARAMETERS FOR TOPUP"
 acqParams=${tmp}/acqParams.txt
 echo 0 -1 0 0.047 > $acqParams
+
+if [ -f "${index}" ]; then
+Info "Concatenation of all the b0"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -quiet -axis 3 $PA $b0s $b0"
+nb0s=`fslval $b0s dim4`	
+for (( c=1; c<=$nb0s; c++ )); do echo 0 1 0 0.047 >> $acqParams; done
+txt_index=$index
+
+else
+
+Info "Getting the mean of the DWI's b0s"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrmath -quiet -axis 3 $b0s mean $b0m"
+
+Info "Concatenation of the b0"
+cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -quiet -axis 3 $PA $b0m $b0"
+
 echo 0 1 0 0.047 >> $acqParams
+# Index file
+refIndex=2			# Reference row of b0 volume in acqParameters
+nT=`fslval $dwi dim4`		# Number of volumes in DWI
+txt_index=${tmp}/indices.txt
+indx=""
+for ((i=1; i<=$nT; i+=1)); do indx="$indx $refIndex"; done
+echo $indx > $txt_index
+fi
+
 cat $acqParams
 
 tdir=TOPUP
@@ -267,18 +299,11 @@ fi
 
 #------------------------------------------------------------------------------#
 # 		EDDY: Movement and Geometric distortion Correction
-refIndex=2
-nT=`fslval $dwi dim4`
-txt_index=${tmp}/${top}_indices.txt
-indx=""
-for ((i=1; i<=$nT; i+=1)); do indx="$indx $refIndex"; done
-echo $indx > $txt_index
-
 Info "EDDY parameters"
 Check "Text Index: \033[0m\t$txt_index"
 Check "Vectors to Fix: \033[0m\t$bvalFSL & $bvecFSL"
 Check "Volume to correct: \033[0m\t$dwi"
-Check "AcqParams reference: \033[0m\t$refIndex"
+Check "AcqParams reference: \033[0m\t cat $refIndex"
 Check "Output directory: \033[0m\t$tdir"
 
 Info "Running EDDY"
