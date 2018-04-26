@@ -23,6 +23,16 @@ raulrcruces@inb.unam.mx
 "
 }
 
+empty_row() {
+Txt=$1
+c=`grep -c "^\s*$" $Txt`
+if ((c > 0)); 
+then
+	echo  -e "\033[38;5;83m\n[INFO]... Borrando filas en blanco de $Txt \033[0m"
+	sed -i '/^\s*$/d' $Txt
+fi
+}
+
 #---------------- FUNCTION: PRINT COLOR COMMAND ----------------#
 cmd() {
 text=$1
@@ -88,9 +98,18 @@ cmd "mkdir $tmp"
 
 #------------------------------------------------------------------------------#
 # 			Do stuff
-Info "Info Getting gradient table "
+Info "Erasing empty rows from gradient table"
+empty_row $bvec
+empty_row $bval
+
+Info "Getting gradient table "
 paste $bvec $bval > $grad
 cat $grad
+
+Info "Checking if gradient table is in column format"
+vol=`fslval $dwi dim4`
+rows=`cat $grad | wc -l`
+if [ "$vol" -eq "$rows" ]; then echo -e "YES, the number of rows in $grad and number of volumes in $dwi are the same: $rows"; else Error "Missmatch between gradient-table and VOLUMES in $dwi, check format"; rm -R $tmp; exit 1; fi
 
 Info "Bias Field Correction of $dwi "
 cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/../scripts/dwibiascorrect -grad $grad -ants -force $dwi $n4"
