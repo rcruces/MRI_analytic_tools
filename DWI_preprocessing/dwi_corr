@@ -6,11 +6,11 @@
 #
 # NOTA: funciona con FSL la última versión de mrtrix. Sin embargo para no tener problemas entre computadoras lugar de cargar la fuente de mrtrix llamo a la función directamente
 #
-# WARNING cuando X y Y son impares
+# 4395 - WARNING cuando X y Y son impares
 # WARNING revisar que el stride sea igual para todos -1,2,3,4
 # ERROR en caso de que falle la mascara  binaria de TOPUP
 # add_slice FUNCTION: Falta Corregir bien el problema de cuando se pega una rebana
-# Incluir el TOPUPy EDDY para 2 o más b0s en lugar de la media, movimiento entre shells
+#
 # EDDY con fsl 5.11 para corregir las bandas negras en sagital???
 
 
@@ -118,7 +118,9 @@ Note "-dwi2fix " $dwi
 Note "-dwiPA " "\t$PA"
 Note "-bvecs " "\t$bvec"
 Note "-bvals " "\t$bval"
-Note "-out " "\t$out"; echo ""; help; exit 0; fi
+Note "-index " "\t$index"
+Note "-out " "\t$out\n"
+help; exit 0; fi
 
 
 #------------------------------------------------------------------------------#
