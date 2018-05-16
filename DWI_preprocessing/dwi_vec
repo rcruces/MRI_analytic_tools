@@ -112,6 +112,7 @@ done
 # Array of variables
 dwis=($dwis)
 Ndwi=${#dwis[@]}
+Info "Number of SHELLS: $Ndwi"
 if [ "${Ndwi}" -lt 1 ]; then 
 	Error "Not enough inputs to work, please check the names of your DWIs"; rm-Rf $tmp; exit 0; else
 	Info "We have ${#dwis[@]} DWIs to work:"
@@ -160,7 +161,8 @@ done
 
 #------------------------------------------------------------------------------#
 # 			Concatenate DWIs
-if [ "${Ndwi}" -gt 2 ]; then Info "Concatenation of DWIs"
+
+if [ "${Ndwi}" -gt 1 ]; then Info "Concatenation of DWIs"
 cmd "/home/inb/lconcha/fmrilab_software/mrtrix3.git/release/bin/mrcat -axis 3 $DWIs $out.nii.gz"
 else
 Info "Input DWIs is the same as the output"
