@@ -21,10 +21,13 @@ NOTE: We require that the bvecs and bvals text files have the same DWI's id in t
 	DWI_001.bvals or DWI_001_bvals.txt
 
 NOTE: The NIFTI and the vector (bval and bvec) must be in the same directory.
-
 NOTE: If only the b0 and one direction are provided for LPCA algorithm noise stimation will be wrong (eg. DWI PA). 
 
+PLEASE REFERENCE FOR LPCA DENOISING
+Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M. (2013). Diffusion weighted image denoising using overcomplete local PCA. PloS one, 8(9), e73021.
 
+PLEASE REFERENCE FOR PCA DENOISING mrtrix
+J. Veraart, D.S. Novikov, D. Christiaens, B. Ades-aron, J. Sijbers, and E. Fieremans Denoising of diffusion MRI using random matrix theory. NeuroImage 142 (2016), pp. 394–406.
 
 Raúl Rodríguez Cruces
 UNAM, Instituto de Neurobiología
