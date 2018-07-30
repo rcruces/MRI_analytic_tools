@@ -22,9 +22,6 @@ for i in *; do cd $i/DWI; echo -e "\033[48;5;125m $i  \033[0m";
   dwi_dn4 DWI_2shell.nii.gz . mrtrix
 cd ../..; done
 ```  
-> **References**  
-> **LPCA:** Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M. (2013). Diffusion weighted image denoising using overcomplete local PCA. PloS one, 8(9), e73021.  
-> **PCA-mrtrix** J. Veraart, D.S. Novikov, D. Christiaens, B. Ades-aron, J. Sijbers, and E. Fieremans Denoising of diffusion MRI using random matrix theory. NeuroImage 142 (2016), pp. 394–406.  
 
 
 ### Paso 2 - Corrección de movimiento y geométrica  
@@ -39,13 +36,14 @@ for i in *; do cd $i/DWI; echo -e "\033[48;5;125m $i  \033[0m";
   dwi_corr -dwi2fix DWI_2shell_dn4_mrtrix.nii.gz -dwiPA DWI_PA.nii.gz -out DWI_corregido -bvecs DWI_2shell.bvecs -bvals DWI_2shell.bvals
 cd ../..; done
 ```  
-> **References**  
-> **EDDY:** Jesper L. R. Andersson and Stamatios N. Sotiropoulos. An integrated approach to correction for off-resonance effects and subject movement in diffusion MR imaging. NeuroImage, 125:1063-1078, 2016.   
-> **TOPUP:** J.L.R. Andersson, S. Skare, J. Ashburner How to correct susceptibility distortions in spin-echo echo-planar images: application to diffusion tensor imaging. NeuroImage, 20(2):870-888, 2003.  
-> S.M. Smith, M. Jenkinson, M.W. Woolrich, C.F. Beckmann, T.E.J. Behrens, H. Johansen-Berg, P.R. Bannister, M. De Luca, I. Drobnjak, D.E. Flitney, R. Niazy, J. Saunders, J. Vickers, Y. Zhang, N. De Stefano, J.M. Brady, and P.M. Matthews. Advances in functional and structural MR image analysis and implementation as FSL. NeuroImage, 23(S1):208-219, 2004.  
-> **B-MATRIX:** Leemans, A., & Jones, D. K. (2009). The B‐matrix must be rotated when correcting for subject motion in DTI data. Magnetic resonance in medicine, 61(6), 1336-1349.  
-
   
 ### Extras de DWI  
 [`dwi_getPA`](https://github.com/rcruces/MRI_analytic_tools/blob/master/DWI_preprocessing/dwi_getPA) Obtiene las imágenes B0 de de la adquisición posterioanterior (DWI-PA) para facilitar el paso 3 con `dwi_corr`.
   
+> **References**  
+> **LPCA:** Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M. (2013). Diffusion weighted image denoising using overcomplete local PCA. PloS one, 8(9), e73021.  
+> **PCA-mrtrix** J. Veraart, D.S. Novikov, D. Christiaens, B. Ades-aron, J. Sijbers, and E. Fieremans Denoising of diffusion MRI using random matrix theory. NeuroImage 142 (2016), pp. 394–406.  
+> **EDDY:** Jesper L. R. Andersson and Stamatios N. Sotiropoulos. An integrated approach to correction for off-resonance effects and subject movement in diffusion MR imaging. NeuroImage, 125:1063-1078, 2016.   
+> **TOPUP:** J.L.R. Andersson, S. Skare, J. Ashburner How to correct susceptibility distortions in spin-echo echo-planar images: application to diffusion tensor imaging. NeuroImage, 20(2):870-888, 2003.  
+> S.M. Smith, M. Jenkinson, M.W. Woolrich, C.F. Beckmann, T.E.J. Behrens, H. Johansen-Berg, P.R. Bannister, M. De Luca, I. Drobnjak, D.E. Flitney, R. Niazy, J. Saunders, J. Vickers, Y. Zhang, N. De Stefano, J.M. Brady, and P.M. Matthews. Advances in functional and structural MR image analysis and implementation as FSL. NeuroImage, 23(S1):208-219, 2004.  
+> **B-MATRIX:** Leemans, A., & Jones, D. K. (2009). The B‐matrix must be rotated when correcting for subject motion in DTI data. Magnetic resonance in medicine, 61(6), 1336-1349.  
