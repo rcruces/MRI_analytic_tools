@@ -1,7 +1,7 @@
 # Contenido: Procesamiento Imágenes Pesadas a Difusión  
-1. [`dwi_vec`]() Paso Inicial, concatena las DWIs y arregla los vectores (Philips) para uno o más shells. 
-1. [`dwi_dn4`](https://github.com/rcruces/epilepsia_processing/blob/master/code/dwi_dn4) Paso 1 de 2 para el pre procesamiento de imágenes pesadas a difusión, denoise y bias field correction con dos opciones LPCA y mrtrix.  
-1. [`dwi_corr`](https://github.com/rcruces/epilepsia_processing/blob/master/code/dwi_corr) Paso final del procesamiento de DWI. Incluye corrección geométricas y de movimiento (EDDY y TOPUP). Finalmente corrige los vectores de acuerdo a los `eddy_parameters` y crea un archivo `mif` corregido y con vectores codificados dentro de él.
+1. [`dwi_vec`](https://github.com/rcruces/MRI_analytic_tools/blob/master/DWI_preprocessing/dwi_vec) Paso Inicial, concatena las DWIs y arregla los vectores (Philips) para uno o más shells. 
+1. [`dwi_dn4`](https://github.com/rcruces/MRI_analytic_tools/blob/master/DWI_preprocessing/dwi_dn4) Paso 1 de 2 para el pre procesamiento de imágenes pesadas a difusión, denoise y bias field correction con dos opciones LPCA y mrtrix.  
+1. [`dwi_corr`](https://github.com/rcruces/MRI_analytic_tools/blob/master/DWI_preprocessing/dwi_corr) Paso final del procesamiento de DWI. Incluye corrección geométricas y de movimiento (EDDY y TOPUP). Finalmente corrige los vectores de acuerdo a los `eddy_parameters` y crea un archivo `mif` corregido y con vectores codificados dentro de él.
   
   
 ### Paso 0 - Concatenacion y correccion de vectores (dependiente de la adquisión)  
@@ -36,5 +36,5 @@ cd ../..; done
 ```
   
 ### Extras de DWI  
-[`dwi_getPA`]() Obtiene las imágenes B0 de de la adquisición posterioanterior (DWI-PA) para facilitar el paso 3 con `dwi_corr`.
+[`dwi_getPA`](https://github.com/rcruces/MRI_analytic_tools/blob/master/DWI_preprocessing/dwi_getPA) Obtiene las imágenes B0 de de la adquisición posterioanterior (DWI-PA) para facilitar el paso 3 con `dwi_corr`.
   
