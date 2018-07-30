@@ -40,7 +40,7 @@ cd ../..; done
 ### Extras de DWI  
 [`dwi_getPA`](https://github.com/rcruces/MRI_analytic_tools/blob/master/DWI_preprocessing/dwi_getPA) Obtiene las imágenes B0 de de la adquisición posterioanterior (DWI-PA) para facilitar el paso 3 con `dwi_corr`.
   
-> **References**  
+## References  
 > **LPCA:** Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M. (2013). Diffusion weighted image denoising using overcomplete local PCA. PloS one, 8(9), e73021.  
 > **PCA-mrtrix** J. Veraart, D.S. Novikov, D. Christiaens, B. Ades-aron, J. Sijbers, and E. Fieremans Denoising of diffusion MRI using random matrix theory. NeuroImage 142 (2016), pp. 394–406.  
 > **EDDY:** Jesper L. R. Andersson and Stamatios N. Sotiropoulos. An integrated approach to correction for off-resonance effects and subject movement in diffusion MR imaging. NeuroImage, 125:1063-1078, 2016.   
