@@ -49,5 +49,5 @@ cd ../..; done
 > **B-MATRIX:** Leemans, A., & Jones, D. K. (2009). The B‐matrix must be rotated when correcting for subject motion in DTI data. Magnetic resonance in medicine, 61(6), 1336-1349.  
   
  ## Notas  
- > Checar para actualización del pipeline [DESIGNER](https://github.com/NYU-DiffusionMRI/Diffusion-Kurtosis-Imaging/blob/master/designer/DESIGNER.py)  
- > ref: Ades-Aron, B., Veraart, J., Kochunov, P., McGuire, S., Sherman, P., Kellner, E., ... & Fieremans, E. (2018). Evaluation of the accuracy and precision of the diffusion parameter EStImation with Gibbs and NoisE removal pipeline. NeuroImage.
+ Checar para actualización del pipeline [DESIGNER](https://github.com/NYU-DiffusionMRI/Diffusion-Kurtosis-Imaging/blob/master/designer/DESIGNER.py)  
+ > Ades-Aron, B., Veraart, J., Kochunov, P., McGuire, S., Sherman, P., Kellner, E., ... & Fieremans, E. (2018). Evaluation of the accuracy and precision of the diffusion parameter EStImation with Gibbs and NoisE removal pipeline. NeuroImage.
