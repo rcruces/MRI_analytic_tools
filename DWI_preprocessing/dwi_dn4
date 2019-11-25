@@ -29,6 +29,9 @@ Manjón, J. V., Coupé, P., Concha, L., Buades, A., Collins, D. L., & Robles, M.
 PLEASE REFERENCE FOR PCA DENOISING mrtrix
 J. Veraart, D.S. Novikov, D. Christiaens, B. Ades-aron, J. Sijbers, and E. Fieremans Denoising of diffusion MRI using random matrix theory. NeuroImage 142 (2016), pp. 394–406.
 
+PLEASE REFERENCE FOR Bias field Correction (N4Biasfield)
+Tustison, N. J., Avants, B. B., Cook, P. A., Zheng, Y., Egan, A., Yushkevich, P. A., & Gee, J. C. (2010). N4ITK: improved N3 bias correction. IEEE transactions on medical imaging, 29(6), 1310-1320.
+
 Raúl Rodríguez Cruces
 UNAM, Instituto de Neurobiología
 raulrcruces@inb.unam.mx
