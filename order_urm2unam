@@ -1,0 +1,95 @@
+
+#!/bin/bash
+# This scrips transforms all files from epilepsia UNAM-TLE into Niiftis with json files
+
+Info() {
+Col="38;5;220m" # Color code
+if [[ ${quiet} != TRUE ]]; then echo  -e "\033[$Col\n[INFO]..... $1 \033[0m"; fi
+}
+
+Error() {
+echo -e "\e[0;31m\n---------------------------------------------\n\n[ERROR]..... $1\n
+---------------------------------------------\e[0m\n"
+}
+
+cmd() {
+text=$1
+echo -e "\033[38;5;118mCOMMAND -->  \033[38;5;122m${text}  \033[0m"
+eval $text
+}
+
+#---------------- FUNCTION: HELP ----------------#
+help() {
+echo -e "\033[38;5;141m
+Usage:    `basename $0`\033[0m  \033[38;5;197m-in\033[0m <original_directory> \033[38;5;197m-out\033[0m <FULL_PATH/control_01>\n
+\t\t\033[38;5;197m-in\033[0m 	Input directory to reorganize to BIDS format.
+\t\t\033[38;5;197m-out\033[0m 	Output directory with full path.
+\t\t\033[38;5;197m-force\033[0m 	will overwrite the directory.
+
+Raul RC
+McGIll University, MNI, MICA-lab, October 2019
+raul.rodriguezcrcues@mcgill.ca
+"
+}
+
+# Create VARIABLES
+for arg in "$@"
+do
+  case "$arg" in
+   -h|-help)
+    help
+    exit 1
+  ;;
+  -in)
+   in=$2
+   shift;shift
+  ;;
+  -out)
+   out=$2
+   shift;shift
+  ;;
+  -force)
+   force=TRUE
+   shift;shift
+  ;;
+   esac
+done
+
+arg=($in $out)
+if [ "${#arg[@]}" -lt 2 ]; then
+Error "One or more mandatory arguments are missing"
+help; exit 0; fi
+
+# Overwrites the output directory
+if [[ ${force} == TRUE ]]; then rm -rf ${out}; fi
+if [ ! -d ${in} ]; then Error "Input directory doesn't exist: \n\t     ${in}"; exit 0; fi
+if [ -d ${out} ]; then Error "Output directory already exist, use -force to overwrite it. \n\t     ${out}\n\t    "; exit 0; fi
+
+here=`pwd`
+cd $in
+
+# make output directory
+mkdir $out
+
+# Sequence names and variables
+mri=(_DWI4fmap _DWI60dir _PseudoFlairDTI _T1_3d _FLAIR_3d _T2_calc_MS _fMRI_Sternberg _fMRI_restingState _T2_3d)
+unam=(DWI4fm DWI60 DWIps T1w flair T2cal fmrSTB fmrRS T2w)
+
+par=`ls *.PAR | wc -l`
+if [[ ${par} != 0 ]]; then Info "These files are in PAR/REC format"
+    for i in {0..8}; do cmd "dcm2niix -b y -o ${out} -f ${unam[$i]} *${mri[$i]}*.PAR"; done
+    # Check if there is a eprime/*PAR file
+    eprime=`ls eprime/*_fMRI_Sternberg*.PAR`;
+    if [ -f "${eprime}" ]; then cmd "dcm2niix -b y -o ${out} -f fmrSTB ${eprime}"; fi
+    # remove weird _ph in T2cal names
+    cd $out
+    for j in `ls *phT2cal_*`; do cmd "mv -v ${j} ${j:3}"; done
+    mv -v *phT2cal.json T2cal.json
+else Info "These files are in DICOM format"
+    for i in {0..8}; do cmd "dcm2niix -b y -o ${out} -f ${unam[$i]} *${mri[$i]}*"; done
+    # remove weird _e? in T2cal names
+    cd $out
+    for j in `ls *e?T2cal.*`; do cmd "mv -v $j T2cal_${j:2:1}.${j#*.}"; done
+fi
+
+cd $here
