@@ -1,0 +1,192 @@
+#!/bin/bash
+#
+# UNAM-TLE format to BIDS
+
+Col="38;5;83m" # Color code
+#---------------- FUNCTION: HELP ----------------#
+help() {
+echo -e "\033[38;5;141m
+Usage:    `basename $0`\033[0m  \033[38;5;197m-in\033[0m <original_directory> \033[38;5;197m-id\033[0m <control_01> \033[38;5;197m-bids\033[0m <BIDS directory path>\n
+\t\t\033[38;5;197m-in\033[0m 	Input directory to reorganize to BIDS format.
+\t\t\033[38;5;197m-id\033[0m 	Identification for the new BIDS directory.
+\t\t\033[38;5;197m-bids\033[0m 	Path to BIDS directory.
+\t\t\033[38;5;197m-force\033[0m 	will overwrite the directory.
+\t\t\033[38;5;197m-quiet\033[0m 	Does NOT print comments.
+
+Check output with:
+http://bids-standard.github.io/bids-validator/
+
+RRC
+McGill University, MNI, MICA-lab, October 2019
+raul.rodriguezcrcues@mcgill.ca
+"
+}
+
+# Chek MICASOFT_DIR
+if [ -z "${MICASOFT_DIR}" ]; then
+echo -e "\e[0;31m\n---------------------------------------------\n
+[ERROR]... MICASOFT_DIR must be define in your enviroment\e[0m
+           TRY: export MICASOFT_DIR=<github_Directory>/micasoft
+\n\e[0;31m---------------------------------------------\e[0m\n
+"; exit 0
+fi
+# Source print functions from MICASOFT_DIR
+source $MICASOFT_DIR/pipelines/08_micaProcessing/mica_printFunctions.sh
+
+#------------------------------------------------------------------------------#
+#			ARGUMENTS
+# Number of inputs
+if [ "$#" -gt 8 ]; then Error "Too may arguments"; help; exit 0; fi
+
+# Create VARIABLES
+for arg in "$@"
+do
+  case "$arg" in
+  -h|-help)
+    help
+    exit 1
+  ;;
+  -id)
+   id=$2
+   shift;shift
+  ;;
+  -in)
+   in=$2
+   shift;shift
+  ;;
+  -bids)
+   bids=$2
+   shift;shift
+  ;;
+  -force)
+   force=TRUE
+   shift;shift
+  ;;
+  -quiet)
+   quiet=TRUE
+   shift;shift
+  ;;
+   esac
+done
+
+# argument check out & WARNINGS
+arg=($id $in $bids)
+if [ "${#arg[@]}" -lt 3 ]; then
+Error "One or more mandatory arguments are missing:"
+Note "-id " $id
+Note "-in " "$in"
+Note "-bids " "$bids"
+help; exit 0; fi
+
+# overwrites the output directory with -quiet=TRUE
+if [[ ${force} == TRUE ]]; then rm -rf ${bids}/sub-${id}; fi
+if [ ! -d ${in} ]; then Error "Input directory doesn't exist: \n\t     ${in}"; exit 0; fi
+if [ ! -d ${bids} ]; then Error "BIDS directory doesn't exist: \n\t     ${bids}"; exit 0; fi
+if [ -d ${bids}/sub-${id} ]; then Error "Output directory already exist, use -force to overwrite it. \n\t     ${bids}/sub-${id}
+\t    "; exit 0; fi
+
+# need to source MRtrix3 git version to get the json files
+source /host/yeatman/local_raid/rcruces/git_here/oma/setup_mrtrix3_git.sh
+
+here=`pwd`
+myBIDS=${bids}/sub-${id}/ses-pre
+
+#---------------- Timer & Beginning ----------------#
+aloita=$(date +%s.%N)
+
+
+#------------------------------------------------------------------------------#
+
+echo -e "\n\033[38;5;141m-------------------------------------------------------------
+             Reorganizing UNAM to BIDS format
+-------------------------------------------------------------\033[0m\n"
+Do_cmd mkdir -p $myBIDS
+cmd "cp $in/*.nii.gz $myBIDS"
+cmd "cp $in/*.bv* $myBIDS"
+cmd "cp $in/*.json $myBIDS"
+cmd "cp $in/T2cal/T2cal.json $myBIDS"
+cmd "cd $myBIDS"
+
+#------------------------------------------------------------------------------#
+#			 anat/
+# Creates the directory
+Info "Creating directory /anat and changing files names"
+if [[ ! -d anat ]]; then
+	Do_cmd mkdir anat
+fi
+id=sub-${id/sub-/}_ses-pre_
+# T1 weighted Nifti
+cmd "mv T1w.nii.gz anat/${id}T1w.nii.gz"
+cmd "mv T1w.json anat/${id}T1w.json"
+# FLAIR Nifti
+cmd "mv flair.nii.gz anat/${id}FLAIR.nii.gz"
+cmd "mv flair.json anat/${id}FLAIR.json"
+# T2 quantitative map (Relaxometry)
+cmd "mv T2map.nii.gz anat/${id}T2map.nii.gz"
+cmd "mv T2cal.json anat/${id}T2map.json"
+
+# T2 weighted nifti
+if [[ -f $myBIDS/T2w.nii.gz ]]; then cmd "mv T2w.json anat/${id}T2w.json"; cmd "mv T2w.nii.gz anat/${id}T2w.nii.gz"; fi
+if [[ -f $myBIDS/DWIps_ADC.nii.gz ]]; then cmd "rm ${myBIDS}/DWIps_ADC.nii.gz"; fi
+
+#------------------------------------------------------------------------------#
+#			 func/
+# Creates the directory
+Info "Creating directory /func and changing files names"
+if [[ ! -d func ]]; then
+	Do_cmd mkdir func
+fi
+# Resting State fMRI BOLD
+cmd "mv fmrRS.nii.gz func/${id}task-resting_bold.nii.gz"
+cmd "mv fmrRS.json func/${id}task-resting_bold.json"
+# Sternberg fMRI BOLD
+cmd "mv fmrSTB.nii.gz func/${id}task-sternberg_bold.nii.gz"
+cmd "mv fmrSTB.json func/${id}task-sternberg_bold.json"
+
+#------------------------------------------------------------------------------#
+#			 dwi/
+# Creates the directory
+if [[ ! -d dwi ]]; then
+		Do_cmd mkdir dwi
+fi
+# Check bval and bvec format
+for i in *.bval; do Nrow=`cat $i | wc -l`;
+		if [ "$Nrow" != 1 ]; then Info "b-values in $i are not in the correct format changing to FSL"; cmd "transpose $i"; fi
+done
+for i in *.bvec; do Nrow=`cat $i | wc -l`;
+		if [ "$Nrow" != 3 ]; then Info "b-values in $i are not in the correct format changing to FSL"; cmd "transpose $i"; fi
+done
+# Removes all tab spaces from bvals and bvecs
+for i in *.bv*; do sed -i -e "s/[[:space:]]\+/ /g" $i; done
+
+# Changes names: PA>>DWI4fm 		AP>>DWI60 DWIps | 1shell 2shell
+dwi=(DWI4fm DWI60 DWIps); acq=(PA b2000 b1000b2000)
+for n in {0..2}; do Dir=0
+		# Get the number of directions for each DWi based on the b-values
+		for i in `cat ${dwi[$n]}.bval`;do if [[ "$i" == 0.00 ]] || [[ "$i" == 0 ]]; then Dir=$((Dir+1)); else Dir=$((Dir+1)); fi; done
+		# Changes names to BIDS format and move to /dwi
+		for j in ${dwi[$n]}*; do
+				cmd "mv $j dwi/${id}acq-${acq[$n]}_dir-${Dir}_dwi${j/${dwi[$n]}/}"
+		done
+done
+
+# Recursively remove empty directories from the raw directory - leaves directories still containing files.
+if [[ -f T2cal.nii.gz ]]; then rm T2cal.nii.gz; fi
+find "${myBIDS}" -type d -empty -delete
+
+cmd "cd $here"
+
+# Ending time
+lopuu=$(date +%s.%N)
+eri=$(echo "$lopuu - $aloita" | bc)
+eri=`echo print $eri/60 | perl`
+echo -e "\n\033[38;5;141m-------------------------------------------------------------
+TOTAL running time:\033[38;5;220m `printf "%0.2f\n" ${eri}` minutes \033[38;5;141m
+-------------------------------------------------------------\033[0m"
+
+#With leading zeroes
+# secs=236521
+# printf '%02dh:%02dm:%02ds\n' $(($secs/3600)) $(($secs%3600/60)) $(($secs%60))
+# With days
+# secs=236521
+# printf '%dd:%dh:%dm:%ds\n' $(($secs/86400)) $(($secs%86400/3600)) $(($secs%3600/60)) $(($secs%60))
