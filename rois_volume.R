@@ -28,4 +28,4 @@ rois.volume <- function(Nifti) {
 
 # -------------------------------------------------------------------- #
 # Uso:
-rois.volume("mi_nifti.nii.gz")
+#rois.volume("mi_nifti.nii.gz")
