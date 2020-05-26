@@ -60,9 +60,9 @@ if [ ! -f $NII ]; then echo -e "\e[0;31m\n[ERROR]... File not found: $NII\n\e[0m
 if [ ! -d $outdir ]; then echo -e "\e[0;31m\n[ERROR]... Directory not found: $outdir\n\e[0m"; exit 2; fi
 format=nii.gz
 if [ "${NII/$format}" = "$NII" ] ; then echo -e "\e[0;31m\n[ERROR]... $NII must be a compressed nifti, with extension 'nii.gz'\n\e[0m"; exit 0; else echo -e "\t[INFO]... $NII has the correct format"; fi
-if [ ! -f `which mri_convert` ]; then echo -e "\e[0;31m\n[ERROR]... Check your FreeSurfer installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... FreeSurfer seems to work."; fi
-if [ ! -f `which mincnlm` ]; then echo -e "\e[0;31m\n[ERROR]... Check your minc-toolkit installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... minc-toolkit seems to work."; fi
-if [ ! -f `which N4BiasFieldCorrection` ]; then echo -e "\e[0;31m\n[ERROR]... Check your ANTs installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... ANTs seems to work."; fi
+if [[ -z `which mri_convert` ]]; then echo -e "\e[0;31m\n[ERROR]... Check your FreeSurfer installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... FreeSurfer seems to work."; fi
+if [[ -z `which mincnlm` ]]; then echo -e "\e[0;31m\n[ERROR]... Check your minc-toolkit installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... minc-toolkit seems to work."; fi
+if [[ -z `which N4BiasFieldCorrection` ]]; then echo -e "\e[0;31m\n[ERROR]... Check your ANTs installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... ANTs seems to work."; fi
 if [ -f $outfile ]; then echo -e "\e[0;31m\n[ERROR]... Outfile already exist: $outfile\n\e[0m"; exit 0; fi
 
 #---------------- Timer & Beginning ----------------#
