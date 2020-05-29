@@ -12,7 +12,7 @@ Also check my code for some basic [R plots](https://github.com/rcruces/R-graph).
 1. [Connectome Prediction Modeling CPM](#connectome-prediction-modeling-cpm)
 1. [rois_volume.R](#`rois_volume.R`)
 
-# [DICOM to BIDS](https://github.com/rcruces/MRI_analytic_tools/tree/master/DICOM to BIDS)  
+# [DICOM to BIDS](https://github.com/rcruces/MRI_analytic_tools/tree/master/DICOM_2_BIDS)  
 Example script to order a set of sorted DICOMS into BIDS (https://bids.neuroimaging.io).  
 > Gorgolewski, Krzysztof J., et al. "The brain imaging data structure, a format for organizing and describing outputs of neuroimaging experiments." Scientific data 3.1 (2016): 1-9. DOI: https://doi.org/10.1038/sdata.2016.44.  
 
