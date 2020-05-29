@@ -23,15 +23,15 @@ raul.rodriguezcrcues@mcgill.ca
 }
 
 # Chek MICASOFT_DIR
-if [ -z "${MICASOFT_DIR}" ]; then
+if [ -z "${gitpath}" ]; then
 echo -e "\e[0;31m\n---------------------------------------------\n
-[ERROR]... MICASOFT_DIR must be define in your enviroment\e[0m
-           TRY: export MICASOFT_DIR=<github_Directory>/micasoft
+[ERROR]... gitpath must be define in your enviroment\e[0m
+           TRY: export gitpath=<github_Directory>
 \n\e[0;31m---------------------------------------------\e[0m\n
 "; exit 0
 fi
-# Source print functions from MICASOFT_DIR
-source $MICASOFT_DIR/pipelines/08_micaProcessing/mica_printFunctions.sh
+# Source print functions
+source $gitpath/MRI_analytic_tools/DICOM_2_BIDS/mica_printFunctions.sh
 
 #------------------------------------------------------------------------------#
 #			ARGUMENTS
