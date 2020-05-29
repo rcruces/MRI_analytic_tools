@@ -8,7 +8,7 @@ git clone https://github.com/rcruces/MRI_analytic_tools.git DICOM_2_BIDS
 ```bash
 export gitpath=<YOUR PATH to the top GITHUB repository>
 ```
-**3.** Make executable these scrip_test
+**3.** Make executable these scrips 
 ```bash
 chmod aug+xX ${gitpath}/MRI_analytic_tools/DICOM_2_BIDS/*
 ```
