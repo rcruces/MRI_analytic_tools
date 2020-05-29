@@ -121,7 +121,7 @@ if [[ $Subj =~ ['!@#$%^&*()_+'] ]]; then Error "Subject id shouldn't contain spe
 
 # check mandatory inputs: -bids
 if [[ -z $BIDS_DIR ]]; then Error "BIDS directory is empty"; exit 0; fi
-BIDS_DIR=${BIDS_DIR/./`pwd`}
+if [[ ${BIDS} == . ]]; then BIDS=`pwd`; fi
 
 # check mandatory inputs: -in
 if [ ! -d ${SUBJ_DCM} ]; then Error "Subject DICOMS directory doesn't exist: \n\t ${Subj}";
