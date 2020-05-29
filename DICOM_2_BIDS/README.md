@@ -1,6 +1,9 @@
 # DICOMS to BIDS format
 
-1.Download or `git clone` this directory
+1.Download or `git clone` this directory  
+```bash
+git clone https://github.com/rcruces/MRI_analytic_tools.git DICOM_2_BIDS
+```
 1.Define on your environment the GITHUB repository PATH as `gitpath`:
 ```bash
 export gitpath=<YOUR PATH to the top GITHUB repository>
