@@ -7,6 +7,7 @@ Usage:
 		NIFTI:		Nifti file to apply the denoise
 		ID: 		Identification for the output file (NO extension)
 		Out directory: 	Path to output, could be here '.'
+		CPUs: 		NUmber of CPU use to process the data
 
 This script aplies a non-local-means denoising using minc-toolkit and the N4 bias field correction from ANTs. 	
 NOTE: this script REQUIRES previous installation of FreeSurfer, minc-toolkit & ANTs.
@@ -29,9 +30,9 @@ raulrcruces@inb.unam.mx
 }
 
 ######### HELP ######### 
-if [ $# -lt 3 ]
+if [ $# -lt 4 ]
 then
-	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\e[0m\t\tNifti: $1\n\t\tID: $2\n\t\tOutput directory:$3"
+	echo -e "\e[0;31m\n[ERROR]... Argument missing: \n\t\tNifti: $1\n\t\tID: $2\n\t\tOutput directory:$3 \n\t\tCPUs: $2\e[0m"
 	print_help
 	exit 1
 fi
@@ -42,6 +43,7 @@ fi
 NII=$1
 id=${2/.nii.gz/}
 outdir=$3
+cpus=$4
 
 echo -e "\033[48;5;22m\n[INIT]\t\tDenoise & Bias Field Correction of file $NII\n\033[0m"
 echo -e "If you use this script please remember to reference the developers:
@@ -62,7 +64,7 @@ format=nii.gz
 if [ "${NII/$format}" = "$NII" ] ; then echo -e "\e[0;31m\n[ERROR]... $NII must be a compressed nifti, with extension 'nii.gz'\n\e[0m"; exit 0; else echo -e "\t[INFO]... $NII has the correct format"; fi
 if [[ -z `which mri_convert` ]]; then echo -e "\e[0;31m\n[ERROR]... Check your FreeSurfer installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... FreeSurfer seems to work."; fi
 if [[ -z `which mincnlm` ]]; then echo -e "\e[0;31m\n[ERROR]... Check your minc-toolkit installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... minc-toolkit seems to work."; fi
-if [[ -z `which N4BiasFieldCorrection` ]]; then echo -e "\e[0;31m\n[ERROR]... Check your ANTs installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... ANTs seems to work."; fi
+#if [[ -z `which N4BiasFieldCorrection` ]]; then echo -e "\e[0;31m\n[ERROR]... Check your ANTs installation \n\e[0m"; exit 0; else echo -e "\t[INFO]... ANTs seems to work."; fi
 if [ -f $outfile ]; then echo -e "\e[0;31m\n[ERROR]... Outfile already exist: $outfile\n\e[0m"; exit 0; fi
 
 #---------------- Timer & Beginning ----------------#
@@ -80,13 +82,13 @@ echo  -e "\033[38;5;45m\n[INFO]... Creando un archivo minc \033[0m"
 mri_convert $NII ${mnc}
 
 echo  -e "\033[38;5;45m\n[INFO]... Aplicando la limpieza de ruido con non-local means \033[0m"
-mincnlm ${mnc} ${mncdn}
+mincnlm ${mnc} ${mncdn} -mt ${cpus}
 
 echo  -e "\033[38;5;45m\n[INFO]... Transformando de minc a nifti \033[0m"
-mri_convert ${mncdn} $out
+mri_convert ${mncdn} $outfile
 
-echo  -e "\033[38;5;45m\n[INFO]... N4 bias field correction \033[0m"
-N4BiasFieldCorrection -d 3 -i $out -o $outfile
+#echo  -e "\033[38;5;45m\n[INFO]... N4 bias field correction \033[0m"
+#N4BiasFieldCorrection -d 3 -i $out -o $outfile
 
 
 
